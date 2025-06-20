@@ -1,4 +1,5 @@
-# kineticstoolkit_extensions
+# kineticstoolkit-extensions
+
 Additional modules and development of new features for Kinetics Toolkit
 
 This repository will replace the different repositories used for the current extension system. It will also be distributed via pip and conda, like kineticstoolkit.
