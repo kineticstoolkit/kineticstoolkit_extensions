@@ -37,12 +37,12 @@ def test_read_smartwheel():
     """Test that read_file works similarly for SW's csv and txt files."""
     kinetics_csv = ktk.ext.pushrimkinetics.read_smartwheel(
         ktk.ext.root_folder
-        + "/tutorials/pushrimkinetics/pushrimkinetics_propulsion.csv"
+        + "/data/pushrimkinetics/pushrimkinetics_propulsion.csv"
     )
 
     kinetics_txt = ktk.ext.pushrimkinetics.read_smartwheel(
         ktk.ext.root_folder
-        + "/tutorials/pushrimkinetics/pushrimkinetics_propulsion.txt"
+        + "/data/pushrimkinetics/pushrimkinetics_propulsion.txt"
     )
 
     smaller = min(kinetics_csv.time.shape[0], kinetics_txt.time.shape[0])
@@ -64,12 +64,12 @@ def test_remove_offsets():
     """Test that remove_offsets works with and without a baseline."""
     kinetics = ktk.ext.pushrimkinetics.read_smartwheel(
         ktk.ext.root_folder
-        + "/tutorials/pushrimkinetics/pushrimkinetics_offsets_propulsion.csv"
+        + "/data/pushrimkinetics/pushrimkinetics_offsets_propulsion.csv"
     )
 
     baseline = ktk.ext.pushrimkinetics.read_smartwheel(
         ktk.ext.root_folder
-        + "/tutorials/pushrimkinetics/pushrimkinetics_offsets_baseline.csv"
+        + "/data/pushrimkinetics/pushrimkinetics_offsets_baseline.csv"
     )
 
     no_offsets1 = ktk.ext.pushrimkinetics.remove_offsets(kinetics)
@@ -90,7 +90,7 @@ def test_apply_calibration():
     """Test that force calculation is similar to precalculated forces."""
     kinetics = ktk.ext.pushrimkinetics.read_smartwheel(
         ktk.ext.root_folder
-        + "/tutorials/pushrimkinetics/pushrimkinetics_offsets_propulsion.csv"
+        + "/data/pushrimkinetics/pushrimkinetics_offsets_propulsion.csv"
     )
 
     test = kinetics.copy()
@@ -126,7 +126,7 @@ def test_calculate_velocity_power():
     """No-regression test for calculate_velocity and calculate_power."""
     kinetics = ktk.ext.pushrimkinetics.read_smartwheel(
         ktk.ext.root_folder
-        + "/tutorials/pushrimkinetics/pushrimkinetics_offsets_propulsion.csv"
+        + "/data/pushrimkinetics/pushrimkinetics_offsets_propulsion.csv"
     )
 
     kinetics = ktk.ext.pushrimkinetics.calculate_velocity(kinetics)

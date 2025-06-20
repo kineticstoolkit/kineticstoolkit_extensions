@@ -72,13 +72,13 @@ def read_n3d(filename: str, labels: Sequence[str] = []) -> TimeSeries:
         extended_header = struct.unpack("73s", fid.read(73))[0]
 
         # Read the rest and put it in an array
-        ndi_array = np.ones((n_frames, n_columns)) * np.NaN
+        ndi_array = np.ones((n_frames, n_columns)) * np.nan
 
         for i_frame in range(n_frames):
             for i_column in range(n_columns):
                 data = struct.unpack("f", fid.read(4))[0]
                 if data < -1e25:  # technically, it is -3.697314e+28
-                    data = np.NaN
+                    data = np.nan
                 ndi_array[i_frame, i_column] = data
 
         # Conversion from mm to meters
