@@ -17,7 +17,7 @@
 
 
 """
-Provide a short description of your extension.
+Read NDI Optotrak N3D files.
 """
 
 __author__ = "Félix Chénier"
@@ -110,11 +110,7 @@ def read_n3d(filename: str, labels: Sequence[str] = []) -> TimeSeries:
     return ts
 
 
-"""
-The section below is optional. If you put code examples in your docstring,
-then running this file will test that your examples give the correct results.
-Please check https://docs.python.org/3/library/doctest.html for details.
-"""
+
 if __name__ == "__main__":  # pragma: no cover
     import doctest
 

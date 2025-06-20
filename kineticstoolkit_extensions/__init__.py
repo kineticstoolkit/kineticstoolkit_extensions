@@ -24,7 +24,7 @@ import os
 
 import kineticstoolkit_extensions.n3d as n3d
 import kineticstoolkit_extensions.pushrimkinetics as pushrimkinetics
-
+import kineticstoolkit_extensions.video as video
 
 def __dir__():
     return ["n3d", "pushrimkinetics"]
