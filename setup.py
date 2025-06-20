@@ -3,12 +3,12 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-with open("kineticstoolkit-extensions/VERSION", "r") as fh:
+with open("kineticstoolkit_extensions/VERSION", "r") as fh:
     version = fh.read()
 
 
 setuptools.setup(
-    name="kineticstoolkit-extensions",
+    name="kineticstoolkit_extensions",
     version=version,
     description="Extensions and unstable development modules for Kinetics Toolkit.",
     long_description=long_description,
