@@ -22,8 +22,12 @@ __email__ = "chenier.felix@uqam.ca"
 __license__ = "Apache 2.0"
 
 
-import kineticstoolkit as ktk
+import kineticstoolkit_extensions.pushrimkinetics as pk
 import numpy as np
+import os
+
+
+this_folder = os.path.dirname(__file__)
 
 
 TEST_CALIBRATION_MATRIX = {
@@ -35,14 +39,12 @@ TEST_CALIBRATION_MATRIX = {
 
 def test_read_smartwheel():
     """Test that read_file works similarly for SW's csv and txt files."""
-    kinetics_csv = ktk.ext.pushrimkinetics.read_smartwheel(
-        ktk.ext.root_folder
-        + "/data/pushrimkinetics_propulsion.csv"
+    kinetics_csv = pk.read_smartwheel(
+        this_folder + "/data/pushrimkinetics_propulsion.csv"
     )
 
-    kinetics_txt = ktk.ext.pushrimkinetics.read_smartwheel(
-        ktk.ext.root_folder
-        + "/data/pushrimkinetics_propulsion.txt"
+    kinetics_txt = pk.read_smartwheel(
+        this_folder + "/data/pushrimkinetics_propulsion.txt"
     )
 
     smaller = min(kinetics_csv.time.shape[0], kinetics_txt.time.shape[0])
@@ -62,18 +64,16 @@ def test_read_smartwheel():
 
 def test_remove_offsets():
     """Test that remove_offsets works with and without a baseline."""
-    kinetics = ktk.ext.pushrimkinetics.read_smartwheel(
-        ktk.ext.root_folder
-        + "/data/pushrimkinetics_offsets_propulsion.csv"
+    kinetics = pk.read_smartwheel(
+        this_folder + "/data/pushrimkinetics_offsets_propulsion.csv"
     )
 
-    baseline = ktk.ext.pushrimkinetics.read_smartwheel(
-        ktk.ext.root_folder
-        + "/data/pushrimkinetics_offsets_baseline.csv"
+    baseline = pk.read_smartwheel(
+        this_folder + "/data/pushrimkinetics_offsets_baseline.csv"
     )
 
-    no_offsets1 = ktk.ext.pushrimkinetics.remove_offsets(kinetics)
-    no_offsets2 = ktk.ext.pushrimkinetics.remove_offsets(kinetics, baseline)
+    no_offsets1 = pk.remove_offsets(kinetics)
+    no_offsets2 = pk.remove_offsets(kinetics, baseline)
 
     # Assert that all force differences are within 1 N
     assert np.all(
@@ -88,13 +88,12 @@ def test_remove_offsets():
 
 def test_apply_calibration():
     """Test that force calculation is similar to precalculated forces."""
-    kinetics = ktk.ext.pushrimkinetics.read_smartwheel(
-        ktk.ext.root_folder
-        + "/data/pushrimkinetics_offsets_propulsion.csv"
+    kinetics = pk.read_smartwheel(
+        this_folder + "/data/pushrimkinetics_offsets_propulsion.csv"
     )
 
     test = kinetics.copy()
-    test = ktk.ext.pushrimkinetics.apply_calibration(
+    test = pk.apply_calibration(
         test,
         **TEST_CALIBRATION_MATRIX,
         reference_frame="hub",
@@ -124,12 +123,11 @@ def test_apply_calibration():
 
 def test_calculate_velocity_power():
     """No-regression test for calculate_velocity and calculate_power."""
-    kinetics = ktk.ext.pushrimkinetics.read_smartwheel(
-        ktk.ext.root_folder
-        + "/data/pushrimkinetics_offsets_propulsion.csv"
+    kinetics = pk.read_smartwheel(
+        this_folder + "/data/pushrimkinetics_offsets_propulsion.csv"
     )
 
-    kinetics = ktk.ext.pushrimkinetics.calculate_velocity(kinetics)
+    kinetics = pk.calculate_velocity(kinetics)
     assert np.allclose(
         [
             np.mean(kinetics.data["Velocity"]),
@@ -138,7 +136,7 @@ def test_calculate_velocity_power():
         [2.875997177730561, 0.8584197191949383],
     )
 
-    kinetics = ktk.ext.pushrimkinetics.calculate_power(kinetics)
+    kinetics = pk.calculate_power(kinetics)
     assert np.allclose(
         kinetics.data["Velocity"] * kinetics.data["Moments"][:, 2],
         kinetics.data["Power"],

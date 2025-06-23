@@ -25,15 +25,17 @@ __email__ = "chenier.felix@uqam.ca"
 __license__ = "Apache 2.0"
 
 
-import kineticstoolkit as ktk
+import kineticstoolkit_extensions.n3d as n3d
 import numpy as np
+import os
+
+
+this_folder = os.path.dirname(__file__)
 
 
 def test_read_n3d():
     """Regression test."""
-    markers = ktk.ext.n3d.read_n3d(
-        ktk.ext.root_folder + "/data/n3d_sample_optotrak.n3d"
-    )
+    markers = n3d.read_n3d(this_folder + "/data/n3d_sample_optotrak.n3d")
 
     tol = 1e-4
     assert np.abs(np.sum(markers.data["Marker0"]) - 172.3365) < tol
@@ -85,8 +87,8 @@ def test_read_n3d():
         "GantD3",
     ]
 
-    markers = ktk.ext.n3d.read_n3d(
-        ktk.ext.root_folder + "/data/n3d_sample_optotrak.n3d",
+    markers = n3d.read_n3d(
+        this_folder + "/data/n3d_sample_optotrak.n3d",
         labels=labels,
     )
 
