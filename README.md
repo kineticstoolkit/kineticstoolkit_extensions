@@ -14,16 +14,16 @@ This package provides modules that are not included straight into kineticstoolki
 
 ### Stable extensions
 
-|  Extension        |  Description                                                                                            |
-|-------------------|---------------------------------------------------------------------------------------------------------|
-|  n3d              |  Provide `read_n3d()` to read Optotrak 3d acquisitions.                                                 |
-|  pushrimkinetics  |  Provide functions to process kinetic data from instrumented wheelchair wheels such as the SmartWheel.  |
+|  Extension                                                                                                                              |  Description                                                                                            |
+|-----------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
+|  [n3d](https://github.com/kineticstoolkit/kineticstoolkit_extensions/tree/main/kineticstoolkit_extensions/n3d)                          |  Provide `read_n3d()` to read Optotrak 3d acquisitions.                                                 |
+|  [pushrimkinetics](https://github.com/kineticstoolkit/kineticstoolkit_extensions/tree/main/kineticstoolkit_extensions/pushrimkinetics)  |  Provide functions to process kinetic data from instrumented wheelchair wheels such as the SmartWheel.  |
 
 ### Currently in development
 
-|  Extension        |  Description                                                                  |
-|-------------------|-------------------------------------------------------------------------------|
-|  video            |  Will allow reading video files to synchronize and add events to TimeSeries.  |
+|  Extension                                                                                                          |  Description                                                                  |
+|---------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+|  [video](https://github.com/kineticstoolkit/kineticstoolkit_extensions/tree/main/kineticstoolkit_extensions/video)  |  Will allow reading video files to synchronize and add events to TimeSeries.  |
 
 
 ## Installing extensions
@@ -70,21 +70,21 @@ On your fork, add a new folder YOUR_EXTENSION_NAME in the `kineticstoolkit_exten
 
 On your fork, add:
 
-- your code in `kineticstoolkit_extensions/YOUR_EXTENSION_NAME/__init__.py`. Take [n3d/__init__.py](https://github.com/kineticstoolkit/kineticstoolkit_extensions/blob/main/kineticstoolkit_extensions/n3d/__init__.py) as an example.
+- your code in `kineticstoolkit_extensions/YOUR_EXTENSION_NAME/__init__.py`. Take `[n3d/__init__.py](https://github.com/kineticstoolkit/kineticstoolkit_extensions/blob/main/kineticstoolkit_extensions/n3d/__init__.py)` as an example.
 - your main documentation file in `kineticstoolkit_extensions/YOUR_EXTENSION_NAME/README.md`.
 - if needed, one or several tutorials that showcase your extension.
 
 **Step 4. Add your extension in this README**
 
-On your fork, edit this README.md and add your extension in the "Stable extensions" table above.
+On your fork, edit this `README.md` and add your extension in the "Stable extensions" table above.
 
 **Step 5. Add unit tests**
 
-A unit test is a function that is run automatically each time there is a new commit to either the `kineticstoolkit` repository, or the `kineticstoolkit_extensions` repository. Writing unit tests is a great way to ensure that your extension will keep running in the long term on all three main platforms (Windows, MacOS, Linux) and on every new version of Python, because we get a notification the minute it fails.
+A unit test is a function that is regularly run automatically. Writing unit tests is a great way to ensure that your extension will keep running in the long term on future versions of kineticstoolkit, on all three main platforms (Windows, MacOS, Linux) and on new versions of Python, because we get a notification the minute it fails.
 
-A unit test can be as simple as using a function on a given input and check that its output matches what we expect, using the `assert` command.
+A unit test generally checks that running a function with a given input generates what we expect, using the `assert` command.
 
-On your fork, add a nest file named `kineticstoolkit_extensions/YOUR_EXTENSION_NAME/test_YOUR_EXTENSION_NAME.py`. Take [test_n3d.py](https://github.com/kineticstoolkit/kineticstoolkit_extensions/blob/main/kineticstoolkit_extensions/n3d/__init__.py) as an example. Each test function must begin with "test_".
+On your fork, add a nest file named `kineticstoolkit_extensions/YOUR_EXTENSION_NAME/test_YOUR_EXTENSION_NAME.py`. Take [test_n3d.py](https://github.com/kineticstoolkit/kineticstoolkit_extensions/blob/main/kineticstoolkit_extensions/n3d/test_n3d.py) as an example. Each test function must begin with "test_".
 
 Your can include (small) data files in a subfolder such as `kineticstoolkit_extensions/YOUR_EXTENSION_NAME/data`.
 
@@ -92,15 +92,11 @@ Your can include (small) data files in a subfolder such as `kineticstoolkit_exte
 
 First, run your unit test locally. You will need to install `pytest` for it.
 
-When all the unit tests run successfully on your machine, commit your files and push it to GitHub, then wait for the unit tests to be executed. If your unit tests do not pass, inspect the output on GitHub using "Details" and search for the error message.
-
-![](_static/images/extension_tests_inspect1.png)
-
-Use this error message to correct your unit test (and maybe also your tutorial), then commit and push again.
+When all the unit tests run successfully on your machine, commit your files and push to GitHub, then wait for the unit tests to be executed. If your unit tests do not pass, inspect the output on GitHub using "Details" and search for the error message. Use this error message to correct your unit test (and maybe also your tutorial), then commit and push again.
 
 
 **Step 7. Create a Pull Request**
 
-If all tests run successfully in your fork, create a Pull Request explaining what you added, and confirming that you have added a well-functioning tutorial and unit test. You will eventually get notified if changes are needed or if your pull request (PR) has been merged to the official `kineticstoolkit_extensions` repository.
+If all tests run successfully in your fork, create a Pull Request explaining what you added, and confirming that you have added a README and a well-functioning unit test. You will eventually get notified if changes are needed or if your pull request (PR) has been merged to the main `kineticstoolkit_extensions` repository.
 
 In any step, do not hesitate to [ask for help](https://github.com/felixchenier/kineticstoolkit/discussions), it will be a pleasure to guide you.
