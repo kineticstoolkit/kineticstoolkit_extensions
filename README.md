@@ -1,13 +1,13 @@
 # kineticstoolkit_extensions
 
-Additional modules and development of new features for Kinetics Toolkit
+Additional modules and development of new features for [Kinetics Toolkit](https://kineticstoolkit.uqam.ca)
 
 This package provides modules that are not included straight into kineticstoolkit because either:
 
-1. Their use case is specific to one research area of human movement biomechanics (e.g., pushrimkinetics)
-2. They refer to unused or older hardware (e.g., n3d)
-3. They are in active development and their API is not stable enough to be distributed in their final form
-4. They are not neutral - for example, they may relate to assumptions on the human body, such as anthropometric tables or local coordinate systems based on bony landmarks.
+1. Their use case is specific to one research area of human movement biomechanics (e.g., pushrimkinetics).
+2. They refer to specific or older hardware (e.g., n3d).
+3. They are in active development and their API is not stable enough to be distributed in their final form.
+4. They are not neutral - for example, they may relate to evolving assumptions on the human body, such as anthropometric tables or local coordinate system definitions based on bony landmarks.
 
 
 ## Current list of extensions
@@ -70,7 +70,7 @@ On your fork, add a new folder YOUR_EXTENSION_NAME in the `kineticstoolkit_exten
 
 On your fork, add:
 
-- your code in `kineticstoolkit_extensions/YOUR_EXTENSION_NAME/__init__.py`. Take `[n3d/__init__.py](https://github.com/kineticstoolkit/kineticstoolkit_extensions/blob/main/kineticstoolkit_extensions/n3d/__init__.py)` as an example.
+- your code in `kineticstoolkit_extensions/YOUR_EXTENSION_NAME/__init__.py`. Take [n3d/__init__.py](https://github.com/kineticstoolkit/kineticstoolkit_extensions/blob/main/kineticstoolkit_extensions/n3d/__init__.py) as an example.
 - your main documentation file in `kineticstoolkit_extensions/YOUR_EXTENSION_NAME/README.md`.
 - if needed, one or several tutorials that showcase your extension.
 
