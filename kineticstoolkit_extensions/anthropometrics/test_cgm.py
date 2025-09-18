@@ -6,13 +6,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-# %% File selection
+# %% File selection and some settings
 
 this_folder = os.path.dirname(__file__)
 
 static_file = this_folder + "/data/static.c3d"
 gait_file = this_folder + "/data/gait.c3d"
 
+# Some marker names in these files need to be renamed:
+#    - RFEP, LFEP, RFEO, LFEO, RTIO, LTIO: those are the joint centres that
+#      have already been calculated using VICON Plugin-Gait, and that serve
+#      as a control (reference) to validate our method.
+#    - *113 to *116: those are unlabelled markers placed on the medial side
+#      of the knees and ankles, that we use to find the centre of the knees
+#      and ankles.
 marker_rename = {
     "RFEP": "RHJC_control",
     "LFEP": "LHJC_control",
@@ -25,53 +32,6 @@ marker_rename = {
     "*113": "LANK_med",
     "*116": "RANK_med",
 }
-
-# %% Create joint centers based on a static acquisition
-
-# Load the static acquisition
-static_points = ktk.read_c3d(
-    static_file,
-    convert_point_unit=True,
-)["Points"]
-
-# Rename markers
-for marker in marker_rename:
-    static_points.rename_data(marker, marker_rename[marker], in_place=True)
-
-# Fake anthropometric measurements
-marker_radius = 0.01
-d_knee = (
-    np.mean(
-        np.sqrt(
-            np.sum(
-                (static_points.data["LKNE"] - static_points.data["LKNE_med"])
-                ** 2,
-                axis=1,
-            )
-        )
-    )
-    - 2 * marker_radius
-)
-d_ankle = (
-    np.mean(
-        np.sqrt(
-            np.sum(
-                (static_points.data["LANK"] - static_points.data["LANK_med"])
-                ** 2,
-                axis=1,
-            )
-        )
-    )
-    - 2 * marker_radius
-)
-l_leg = np.max(
-    np.sqrt(
-        np.sum(
-            (static_points.data["RASI"] - static_points.data["RANK"]) ** 2,
-            axis=1,
-        )
-    )
-)
 
 # Interconnections for visualization
 interconnections_cgm = {
@@ -101,14 +61,44 @@ interconnections_cgm = {
 }
 
 
-static_points.data["Pelvis"] = ant.create_pelvis_lcs_davis1991(
-    rasis=static_points.data["RASI"],
-    lasis=static_points.data["LASI"],
-    rpsis=static_points.data["RPSI"],
-    lpsis=static_points.data["LPSI"],
+# %% Create joint centers from markers based on a static acquisition
+
+# Load the static acquisition
+static_points = ktk.read_c3d(
+    static_file,
+    convert_point_unit=True,
+)["Points"]
+
+# Rename markers
+for marker in marker_rename:
+    static_points.rename_data(marker, marker_rename[marker], in_place=True)
+
+# Fake anthropometric measurements. Normally we would measure these dimensions
+# on the participant using a measuring tape.
+marker_radius = 0.01
+d_knee = (
+    np.mean(
+        ktk.geometry.get_distances(
+            static_points.data["LKNE"], static_points.data["LKNE_med"]
+        )
+    )
+    - 2 * marker_radius
+)
+d_ankle = (
+    np.mean(
+        ktk.geometry.get_distances(
+            static_points.data["LANK"], static_points.data["LANK_med"]
+        )
+    )
+    - 2 * marker_radius
+)
+l_leg = np.max(
+    ktk.geometry.get_distances(
+        static_points.data["RASI"], static_points.data["RANK"]
+    )
 )
 
-# Add hips
+# Add hip joint centres
 for side in ["R", "L"]:
     static_points.data[f"{side}HJC"] = ant.infer_hip_joint_center_hara2016(
         rasis=static_points.data["RASI"],
@@ -118,27 +108,11 @@ for side in ["R", "L"]:
         l_leg=l_leg,
         side=side,
     )
+    # Make them red in the Player
     static_points.add_data_info(f"{side}HJC", "Color", "r", in_place=True)
 
-# Thigh LCS
+# Add knee joint centres (middle point between lateral and medial epicondyles)
 for side in ["R", "L"]:
-    static_points.data[f"{side}Thigh"] = ant.create_thigh_lcs_davis1991(
-        hjc=static_points.data[f"{side}HJC"],
-        lateral_ep=static_points.data[f"{side}KNE"],
-        thigh_marker=static_points.data[f"{side}THI"],
-        side=side,
-    )
-
-# Knee joint center
-for side in ["R", "L"]:
-    # static_points.data[f"{side}KJC"] = ant.infer_knee_joint_center_davis1991(
-    #     hjc=static_points.data[f"{side}HJC"],
-    #     lateral_ep=static_points.data[f"{side}KNE"],
-    #     thigh_marker=static_points.data[f"{side}THI"],
-    #     knee_width=d_knee,
-    #     marker_radius=marker_radius,
-    # )
-    # static_points.add_data_info(f"{side}KJC", "Color", "r", in_place=True)
     static_points.add_data(
         f"{side}KJC",
         0.5
@@ -148,26 +122,11 @@ for side in ["R", "L"]:
         ),
         in_place=True,
     )
+    # Make them red in the Player
+    static_points.add_data_info(f"{side}KJC", "Color", "r", in_place=True)
 
-# Shank LCS
+# Add ankle joint centres (middle point between medial and lateral malleollus)
 for side in ["R", "L"]:
-    static_points.data[f"{side}Shank"] = ant.create_shank_lcs_davis1991(
-        kjc=static_points.data[f"{side}KJC"],
-        lateral_mal=static_points.data[f"{side}ANK"],
-        shank_marker=static_points.data[f"{side}TIB"],
-        side=side,
-    )
-
-# Ankle joint center
-for side in ["R", "L"]:
-    # static_points.data[f"{side}AJC"] = ant.infer_ankle_joint_center_davis1991(
-    #     kjc=static_points.data[f"{side}KJC"],
-    #     lateral_mal=static_points.data[f"{side}ANK"],
-    #     shank_marker=static_points.data[f"{side}TIB"],
-    #     ankle_width=d_ankle,
-    #     marker_radius=marker_radius,
-    # )
-    # static_points.add_data_info(f"{side}AJC", "Color", "r", in_place=True)
     static_points.add_data(
         f"{side}AJC",
         0.5
@@ -177,11 +136,9 @@ for side in ["R", "L"]:
         ),
         in_place=True,
     )
+    # Make them red in the Player
+    static_points.add_data_info(f"{side}AJC", "Color", "r", in_place=True)
 
-
-ktk.Player(
-    static_points, interconnections=interconnections_cgm, up="z", anterior="y"
-)
 
 # %% Create the marker clusters for reconstruction during gait
 clusters = {
@@ -202,7 +159,7 @@ clusters = {
     ),
 }
 
-# %% Process the gait trial
+# %% Now process the gait trial
 gait_points = ktk.read_c3d(gait_file, convert_point_unit=True)["Points"]
 
 # Rename markers
@@ -228,7 +185,7 @@ tracked_points = ktk.kinematics.track_cluster(gait_points, clusters["LShank"])
 gait_points.add_data("LAJC", tracked_points.data["LAJC"], in_place=True)
 
 
-# Create rigid bodies
+# Create rigid bodies according to the ISB recommendations
 gait_bodies = ktk.TimeSeries(time=gait_points.time)
 gait_bodies.add_data(
     "Pelvis",
@@ -366,7 +323,8 @@ angles.add_data("LAnkleAbduction", euler_angles[:, 1], in_place=True)
 angles.add_data("LAnkleExtRot", euler_angles[:, 2], in_place=True)
 
 
-# Reference angles
+# Add reference angles from the c3d
+# (x1000 because "points" were scaled from mm to m on reading)
 angles.add_data(
     "RHipFlexion_control",
     1000 * gait_points.data["RHipAngles"][:, 0],
@@ -463,6 +421,7 @@ angles.add_data(
     in_place=True,
 )
 
+# %% Visualizing the results
 
 ktk.Player(
     gait_points,
@@ -556,3 +515,23 @@ angles.plot(
 )
 
 plt.tight_layout()
+
+# %% Assertions for using this demo as a unit test
+
+# Hip and knee flexion in a ±3deg range
+assert np.allclose(
+    angles.data["RHipFlexion"], angles.data["RHipFlexion_control"], atol=3
+)
+assert np.allclose(
+    angles.data["LHipFlexion"], angles.data["LHipFlexion_control"], atol=3
+)
+assert np.allclose(
+    angles.data["RKneeFlexion"], angles.data["RKneeFlexion_control"], atol=3
+)
+assert np.allclose(
+    angles.data["LKneeFlexion"], angles.data["LKneeFlexion_control"], atol=3
+)
+
+# We don't check for ankle because it just doesn't fit. I'm not sure why and
+# it's difficult to know because I don't know exactly what data processing has
+# been made to these files.
