@@ -1,14 +1,14 @@
 """Test code for UQAM gait lab."""
 
 import kineticstoolkit.lab as ktk
+from kineticstoolkit_extensions import anthropometrics as ant
 import numpy as np
 import matplotlib.pyplot as plt
-import humans
 
 # %% File selection
 
-static_file = "sample_static.c3d"
-gait_file = "sample_gait.c3d"
+static_file = "data/static.c3d"
+gait_file = "data/gait.c3d"
 
 marker_rename = {
     "RFEP": "RHJC_control",
@@ -98,7 +98,7 @@ interconnections_cgm = {
 }
 
 
-static_points.data["Pelvis"] = humans.create_pelvis_lcs_davis1991(
+static_points.data["Pelvis"] = ant.create_pelvis_lcs_davis1991(
     rasis=static_points.data["RASI"],
     lasis=static_points.data["LASI"],
     rpsis=static_points.data["RPSI"],
@@ -107,7 +107,7 @@ static_points.data["Pelvis"] = humans.create_pelvis_lcs_davis1991(
 
 # Add hips
 for side in ["R", "L"]:
-    static_points.data[f"{side}HJC"] = humans.infer_hip_joint_center_hara2016(
+    static_points.data[f"{side}HJC"] = ant.infer_hip_joint_center_hara2016(
         rasis=static_points.data["RASI"],
         lasis=static_points.data["LASI"],
         rpsis=static_points.data["RPSI"],
@@ -119,7 +119,7 @@ for side in ["R", "L"]:
 
 # Thigh LCS
 for side in ["R", "L"]:
-    static_points.data[f"{side}Thigh"] = humans.create_thigh_lcs_davis1991(
+    static_points.data[f"{side}Thigh"] = ant.create_thigh_lcs_davis1991(
         hjc=static_points.data[f"{side}HJC"],
         lateral_ep=static_points.data[f"{side}KNE"],
         thigh_marker=static_points.data[f"{side}THI"],
@@ -128,7 +128,7 @@ for side in ["R", "L"]:
 
 # Knee joint center
 for side in ["R", "L"]:
-    # static_points.data[f"{side}KJC"] = humans.infer_knee_joint_center_davis1991(
+    # static_points.data[f"{side}KJC"] = ant.infer_knee_joint_center_davis1991(
     #     hjc=static_points.data[f"{side}HJC"],
     #     lateral_ep=static_points.data[f"{side}KNE"],
     #     thigh_marker=static_points.data[f"{side}THI"],
@@ -148,7 +148,7 @@ for side in ["R", "L"]:
 
 # Shank LCS
 for side in ["R", "L"]:
-    static_points.data[f"{side}Shank"] = humans.create_shank_lcs_davis1991(
+    static_points.data[f"{side}Shank"] = ant.create_shank_lcs_davis1991(
         kjc=static_points.data[f"{side}KJC"],
         lateral_mal=static_points.data[f"{side}ANK"],
         shank_marker=static_points.data[f"{side}TIB"],
@@ -157,7 +157,7 @@ for side in ["R", "L"]:
 
 # Ankle joint center
 for side in ["R", "L"]:
-    # static_points.data[f"{side}AJC"] = humans.infer_ankle_joint_center_davis1991(
+    # static_points.data[f"{side}AJC"] = ant.infer_ankle_joint_center_davis1991(
     #     kjc=static_points.data[f"{side}KJC"],
     #     lateral_mal=static_points.data[f"{side}ANK"],
     #     shank_marker=static_points.data[f"{side}TIB"],
