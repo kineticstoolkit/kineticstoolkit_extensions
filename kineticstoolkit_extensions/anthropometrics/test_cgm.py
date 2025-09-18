@@ -4,11 +4,14 @@ import kineticstoolkit.lab as ktk
 from kineticstoolkit_extensions import anthropometrics as ant
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 # %% File selection
 
-static_file = "data/static.c3d"
-gait_file = "data/gait.c3d"
+this_folder = os.path.dirname(__file__)
+
+static_file = this_folder + "/data/static.c3d"
+gait_file = this_folder + "/data/gait.c3d"
 
 marker_rename = {
     "RFEP": "RHJC_control",
