@@ -1,7 +1,7 @@
 """Test code for UQAM gait lab."""
 
 import kineticstoolkit.lab as ktk
-from kineticstoolkit_extensions import anthropometrics as ant
+from kineticstoolkit_extensions import anthropometry as am
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -100,11 +100,10 @@ l_leg = np.max(
 
 # Add hip joint centres
 for side in ["R", "L"]:
-    static_points.data[f"{side}HJC"] = ant.infer_hip_joint_center_hara2016(
+    static_points.data[f"{side}HJC"] = am.infer_hip_joint_center_hara2016(
         rasis=static_points.data["RASI"],
         lasis=static_points.data["LASI"],
-        rpsis=static_points.data["RPSI"],
-        lpsis=static_points.data["LPSI"],
+        mpsis=0.5*(static_points.data["RPSI"]+static_points.data["LPSI"]),
         l_leg=l_leg,
         side=side,
     )

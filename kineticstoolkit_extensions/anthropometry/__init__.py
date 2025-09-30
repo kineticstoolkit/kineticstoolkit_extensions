@@ -90,16 +90,14 @@ INERTIA = _read_markdown_table("""
 # %% Infer joint centers
 
 
-def _infer_hip_l5s1_centers(
+def _infer_hip_l5s1_centers_reed1999(
     *,
     rasis: ArrayLike,
     lasis: ArrayLike,
-    rpsis: ArrayLike,
-    lpsis: ArrayLike,
     sym: ArrayLike,
     sex: str,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Return right hip, left hip, l5s1."""
+    """Return (right hip, left hip, l5s1)."""
     # Create a local coordinate system at the anterior superior iliac spines
     # midpoint, according to Reed et al.
     masis = 0.5 * (rasis + lasis)
@@ -110,22 +108,18 @@ def _infer_hip_l5s1_centers(
     # Calculate the points in the local coordinate system
     local_rasis = ktk.geometry.get_local_coordinates(rasis, lcs)
     local_lasis = ktk.geometry.get_local_coordinates(lasis, lcs)
-    local_rpsis = ktk.geometry.get_local_coordinates(rpsis, lcs)
-    local_lpsis = ktk.geometry.get_local_coordinates(lpsis, lcs)
     local_sym = ktk.geometry.get_local_coordinates(sym, lcs)
 
     # Create a cluster using these locations
     cluster = {
         "rasis": np.nanmean(local_rasis, axis=0)[np.newaxis],
         "lasis": np.nanmean(local_lasis, axis=0)[np.newaxis],
-        "rpsis": np.nanmean(local_rpsis, axis=0)[np.newaxis],
-        "lpsis": np.nanmean(local_lpsis, axis=0)[np.newaxis],
         "sym": np.nanmean(local_sym, axis=0)[np.newaxis],
     }
 
     points = ktk.TimeSeries(
         time=np.arange(len(rasis)),
-        data={"rasis": rasis, "lasis": lasis, "lpsis": lpsis, "sym": sym},
+        data={"rasis": rasis, "lasis": lasis, "sym": sym},
     )
 
     # Track the pelvis using this definition
@@ -180,8 +174,6 @@ def infer_hip_joint_center_reed1999(
     *,
     rasis: ArrayLike,
     lasis: ArrayLike,
-    rpsis: ArrayLike,
-    lpsis: ArrayLike,
     sym: ArrayLike,
     sex: str,
     side: str = "R",
@@ -194,22 +186,38 @@ def infer_hip_joint_center_reed1999(
     Congress &  Exposition, pp. 1999-01–0959.
     https://doi.org/10.4271/1999-01-0959
 
+    Parameters
+    ----------
+    rasis
+        Position of a marker placed on the right anterior iliac spine as an
+        Nx4 point series.
+    lasis
+        Position of a marker placed on the left anterior iliac spine as an
+        Nx4 point series.
+    sym
+        Position of the pubic symphysis as an Nx4 point series.
+    sex
+        Either 'M' or 'F'
+    side
+        Either 'R' or 'L'
+
+    Returns
+    -------
+    np.ndarray
+        Position of the hip joint centre as an Nx4 point series.
+
     """
     if side == "R":
-        return _infer_hip_l5s1_centers(
+        return _infer_hip_l5s1_centers_reed1999(
             rasis=rasis,
             lasis=lasis,
-            rpsis=rpsis,
-            lpsis=lpsis,
             sym=sym,
             sex=sex,
         )[0]
     elif side == "L":
-        return _infer_hip_l5s1_centers(
+        return _infer_hip_l5s1_centers_reed1999(
             rasis=rasis,
             lasis=lasis,
-            rpsis=rpsis,
-            lpsis=lpsis,
             sym=sym,
             sex=sex,
         )[1]
@@ -217,21 +225,84 @@ def infer_hip_joint_center_reed1999(
         raise ValueError("Side must be either 'R' or 'L'.")
 
 
+def infer_l5s1_joint_center_reed1999(
+    *,
+    rasis: ArrayLike,
+    lasis: ArrayLike,
+    sym: ArrayLike,
+    sex: str,
+    side: str = "R",
+) -> np.ndarray:
+    """
+    Infer L5-S1 joint centre based on pelvis regression (Reed et al., 1999).
+
+    Reed, M., Manary, M.A., Schneider, L.W., 1999. Methods for Measuring and
+    Representing Automobile Occupant Posture. Presented at the International
+    Congress &  Exposition, pp. 1999-01–0959.
+    https://doi.org/10.4271/1999-01-0959
+
+    Parameters
+    ----------
+    rasis
+        Position of a marker placed on the right anterior iliac spine as an
+        Nx4 point series.
+    lasis
+        Position of a marker placed on the left anterior iliac spine as an
+        Nx4 point series.
+    sym
+        Position of the pubic symphysis as an Nx4 point series.
+    sex
+        Either 'M' or 'F'
+    side
+        Either 'R' or 'L'
+
+    Returns
+    -------
+    np.ndarray
+        Position of the L5S1 joint centre as an Nx4 point series.
+
+    """
+    return _infer_hip_l5s1_centers_reed1999(
+        rasis=rasis, lasis=lasis, sym=sym, sex=sex
+    )[2]
+
+
 def infer_hip_joint_center_hara2016(
     *,
     rasis: ArrayLike,
     lasis: ArrayLike,
-    rpsis: ArrayLike,
-    lpsis: ArrayLike,
+    mpsis: ArrayLike,
     l_leg: float,
     side: str = "R",
 ) -> np.ndarray:
     """
-    Infer hip joint center based on Hara et al., 2016.
+    Infer hip joint centre based on pelvis regression (Hara et al., 2016).
 
     Hara, R., McGinley, J., Briggs, C., Baker, R., Sangeux, M., 2016.
     Predicting the location of the hip joint centres, impact of age group and
     sex. Sci Rep 6, 37707. https://doi.org/10.1038/srep37707
+
+    Parameters
+    ----------
+    rasis
+        Position of a marker placed on the right anterior iliac spine as an
+        Nx4 point series.
+    lasis
+        Position of a marker placed on the left anterior iliac spine as an
+        Nx4 point series.
+    mpsis
+        Middle point between both posterior iliac spines as an Nx4 point
+        series.
+    l_leg
+        Distance from the anterior iliac spine to medial malleolus through the
+        medial epicondyle of the femur, in meters.
+    side
+        Either 'R' or 'L'.
+
+    Returns
+    -------
+    np.ndarray
+        Position of the hip joint centre as an Nx4 point series.
 
     """
     hjc_x = 0.011 - 0.063 * l_leg
@@ -247,13 +318,11 @@ def infer_hip_joint_center_hara2016(
 
     return ktk.geometry.get_global_coordinates(
         local_hip_center,
-        create_pelvis_lcs_davis1991(
-            rasis=rasis, lasis=lasis, rpsis=rpsis, lpsis=lpsis
-        ),
+        _create_pelvis_lcs_davis1991(rasis=rasis, lasis=lasis, mpsis=mpsis),
     )
 
 
-def infer_knee_joint_center_davis1991(
+def _infer_knee_joint_center_davis1991(
     *,
     hjc: ArrayLike,
     lateral_ep: ArrayLike,
@@ -268,6 +337,11 @@ def infer_knee_joint_center_davis1991(
     Davis, R.B., Õunpuu, S., Tyburski, D., Gage, J.R., 1991. A gait analysis
     data collection and reduction technique. Human Movement Science 10,
     575–587. https://doi.org/10.1016/0167-9457(91)90046-Z
+
+    For now this is not a public function because this is so dependent on the
+    positionning of the thigh marker, and there are many better ways to
+    construct this markers, such as using temporary medial knee markers in a
+    static pose.
 
     """
     if side == "R":
@@ -290,7 +364,7 @@ def infer_knee_joint_center_davis1991(
     )
 
 
-def infer_ankle_joint_center_davis1991(
+def _infer_ankle_joint_center_davis1991(
     *,
     kjc: ArrayLike,
     lateral_mal: ArrayLike,
@@ -300,11 +374,16 @@ def infer_ankle_joint_center_davis1991(
     side: str = "R",
 ) -> np.ndarray:
     """
-    Infer knee joint center based on knee width measurement.
+    Infer ankle joint center based on knee width measurement.
 
     Davis, R.B., Õunpuu, S., Tyburski, D., Gage, J.R., 1991. A gait analysis
     data collection and reduction technique. Human Movement Science 10,
     575–587. https://doi.org/10.1016/0167-9457(91)90046-Z
+
+    For now this is not a public function because this is so dependent on the
+    positionning of the shank marker, and there are many better ways to
+    construct this markers, such as using temporary medial malleolus markers
+    in a static pose.
 
     """
     if side == "R":
@@ -327,31 +406,7 @@ def infer_ankle_joint_center_davis1991(
     )
 
 
-def infer_l5s1_joint_center(
-    *,
-    rasis: ArrayLike,
-    lasis: ArrayLike,
-    rpsis: ArrayLike,
-    lpsis: ArrayLike,
-    sym: ArrayLike,
-    sex: str,
-    side: str = "R",
-) -> np.ndarray:
-    """
-    Infer L5-S1 joint center based on pelvis regression (Reed et al., 1999).
-
-    Reed, M., Manary, M.A., Schneider, L.W., 1999. Methods for Measuring and
-    Representing Automobile Occupant Posture. Presented at the International
-    Congress &  Exposition, pp. 1999-01–0959.
-    https://doi.org/10.4271/1999-01-0959
-
-    """
-    return _infer_hip_l5s1_centers(
-        rasis=rasis, lasis=lasis, rpsis=rpsis, lpsis=lpsis, sym=sym, sex=sex
-    )[2]
-
-
-def infer_c7t1_joint_center(
+def infer_c7t1_joint_center_dumas2018(
     c7: ArrayLike,
     l5s1: ArrayLike,
     sup: ArrayLike,
@@ -362,13 +417,35 @@ def infer_c7t1_joint_center(
     """
     Infer C7-T1 joint center based on thorax regression (Dumas et al., 2018).
 
-    C7T1 is inferred using Dumas, R., Wojtusch, J., 2018. Estimation of the
-    Body Segment Inertial Parameters for the Rigid Body Biomechanical Models
-    Used in Motion Analysis, in: Handbook of Human Motion. Springer
-    International Publishing, Cham, pp. 47–77.
-    https://doi.org/10.1007/978-3-319-14418-4_147
+    Dumas, R., Wojtusch, J., 2018. Estimation of the Body Segment Inertial
+    Parameters for the Rigid Body Biomechanical Models Used in Motion Analysis,
+    in: Handbook of Human Motion. Springer International Publishing, Cham,
+    pp. 47–77. https://doi.org/10.1007/978-3-319-14418-4_147
 
     The trunk must be in neutral position.
+
+    Parameters
+    ----------
+    c7
+        Position of a marker placed on C7 vertebra as an Nx4 point series.
+    l5s1
+        Position of the L5S1 joint centre as an Nx4 point series.
+    sup
+        Position of a marker placed on the suprasternale notch as an Nx4
+        point series.
+    rac
+        Position of a marker placed on the right acromion as an Nx4 point
+        series.
+    lac
+        Position of a marker placed on the left acromion as an Nx4 point
+        series.
+    sex
+        Either 'M' or 'F'.
+
+    Returns
+    -------
+    np.ndarray
+        Position of the C7T1 joint centre as an Nx4 point series.
 
     """
     # Create reference frames with x: C7-SUP, y: L5S1-C7, z: right
@@ -387,7 +464,7 @@ def infer_c7t1_joint_center(
         c7t1_angle = 14  # deg
         c7t1_ratio = 0.53
     else:
-        raise ValueError("sex must be 'M' or 'F'")
+        raise ValueError("sex must be either 'M' or 'F'")
 
     local_c7t1 = ktk.geometry.create_point_series(
         x=[c7t1_ratio * tw * np.cos(np.deg2rad(c7t1_angle))],
@@ -397,7 +474,7 @@ def infer_c7t1_joint_center(
     return ktk.geometry.get_global_coordinates(local_c7t1, thorax_lcs)
 
 
-def infer_gh_joint_center(
+def infer_gh_joint_center_rab2002(
     c7: ArrayLike,
     l5s1: ArrayLike,
     sup: ArrayLike,
@@ -407,13 +484,38 @@ def infer_gh_joint_center(
     side: str = "R",
 ) -> np.ndarray:
     """
-    Infer glenohumeral joint center based on thorax regression (Rab et al., 2002).
+    Infer glenohumeral joint centre based on thorax regression (Rab et al., 2002).
 
     GH joint centres are inferred using Rab, G., Petuskey, K., Bagley, A.,
     2002. A method for determination of upper extremity ktk.kinematics.
     Gait & Posture 15, 113–119. https://doi.org/10.1016/S0966-6362(01)00155-2
 
     Arms and trunk must be in neutral position.
+
+    Parameters
+    ----------
+    c7
+        Position of a marker placed on C7 vertebra as an Nx4 point series.
+    l5s1
+        Position of the L5S1 joint centre as an Nx4 point series.
+    sup
+        Position of a marker placed on the suprasternale notch as an Nx4
+        point series.
+    rac
+        Position of a marker placed on the right acromion as an Nx4 point
+        series.
+    lac
+        Position of a marker placed on the left acromion as an Nx4 point
+        series.
+    sex
+        Either 'M' or 'F'.
+    side
+        Either 'R' or 'L'.
+
+    Returns
+    -------
+    np.ndarray
+        Position of the glenohumeral joint centre as an Nx4 point series.
 
     """
     # Create reference frames with x: C7-SUP, y: L5S1-C7, z: right
@@ -448,15 +550,44 @@ def infer_gh_joint_center(
 # %% Create local coordinate systems
 
 
-def create_pelvis_lcs_isb(
+def create_pelvis_lcs_wu2002(
     *,
     l5s1: ArrayLike,
     rasis: ArrayLike,
     lasis: ArrayLike,
-    rpsis: ArrayLike,
-    lpsis: ArrayLike,
+    mpsis: ArrayLike,
 ) -> np.ndarray:
-    mpsis = 0.5 * (rpsis + lpsis)
+    """
+    Create pelvis LCS for data reporting using ISB recommendations.
+
+    Wu, G., Siegler, S., Allard, P., Kirtley, C., Leardini, A., Rosenbaum,D.,
+    Whittle, M., D’Lima, D.D., Cristofolini, L., Witte, H., Schmid, O.,
+    Stokes, I., 2002. ISB recommendation on definitions of joint coordinate
+    system of various joints for the reporting of human joint motion—part I:
+    ankle, hip, and spine. Journal of Biomechanics 35, 543–548.
+    https://doi.org/10.1016/S0021-9290(01)00222-6
+
+    Parameters
+    ----------
+    l5s1
+        L5S1 joint center as an Nx4 point series. Origin of the returned LCS
+    rasis
+        Position of a marker placed on the right anterior iliac spine as an
+        Nx4 point series.
+    lasis
+        Position of a marker placed on the left anterior iliac spine as an
+        Nx4 point series.
+    mpsis
+        Middle point between both posterior iliac spines as an Nx4 point
+        series.
+
+    Returns
+    -------
+    np.ndarray
+        Local coordinate system of the pelvis, as an Nx4x4 transform series.
+        The origin is at L5S1, x points forward, y points up, z points right.
+
+    """
     return ktk.geometry.create_transform_series(
         positions=l5s1,
         z=(rasis - lasis),
@@ -464,15 +595,17 @@ def create_pelvis_lcs_isb(
     )
 
 
-def create_pelvis_lcs_davis1991(
+def _create_pelvis_lcs_davis1991(
     *,
     rasis: ArrayLike,
     lasis: ArrayLike,
-    rpsis: ArrayLike,
-    lpsis: ArrayLike,
+    mpsis: ArrayLike,
 ) -> np.ndarray:
     """
-    Create Pelvis LCS based on the conventional gait model.
+    Create temporary pelvis LCS based on the conventional gait model.
+
+    Private because it is only used to infer hip position and we don't want
+    to expose too many similar functions, which could get quickly confusing.
 
     Davis, R.B., Õunpuu, S., Tyburski, D., Gage, J.R., 1991. A gait analysis
     data collection and reduction technique. Human Movement Science 10,
@@ -484,17 +617,97 @@ def create_pelvis_lcs_davis1991(
     one is Figure 3 (used to infer the hip joint centers), not Figure 2
     (used to calculate joint angles).
 
+    Parameters
+    ----------
+    rasis
+        Position of a marker placed on the right anterior iliac spine as an
+        Nx4 point series.
+    lasis
+        Position of a marker placed on the left anterior iliac spine as an
+        Nx4 point series.
+    mpsis
+        Middle point between both posterior iliac spines as an Nx4 point
+        series.
+
+    Returns
+    -------
+    np.ndarray
+        Local coordinate system for the pelvis as an Nx4x4 transform series.
+        The origin is at the middle point between both anterios iliac spines,
+        x points forward, y points right, z points down.
+
     """
     return ktk.geometry.create_transform_series(
         positions=0.5 * (rasis + lasis),
         y=rasis - lasis,
-        xy=0.5 * (rasis + lasis) - 0.5 * (rpsis + lpsis),
+        xy=0.5 * (rasis + lasis) - mpsis,
     )
 
 
-def create_thorax_lcs(
+def create_thorax_lcs_wu2005(
+    *, sup: ArrayLike, px: ArrayLike, c7: ArrayLike, t8: ArrayLike
+) -> np.ndarray:
+    """
+    Create thorax LCS based on the ISB recommendations (Wu et al., 2005).
+
+    Wu, G., Van Der Helm, F.C.T., Veeger, H.E.J.D., Makhsous, M., Van Roy,
+    P., Anglin, C., Nagels, J., Karduna, A.R., McQuade, K., Wang, X.,
+    Werner, F.W., Buchholz, B., Others, 2005. ISB recommendation on definitions
+    of joint coordinate systems of various joints for the reporting of human
+    joint motion - Part II: shoulder, elbow, wrist and hand. Journal of
+    Biomechanics 38, 981–992. https://doi.org/10.1016/j.jbiomech.2004.05.042
+
+    Parameters
+    ----------
+    sup
+        Position of the suprasternale notch as an Nx4 point series.
+    px
+        Position of the xiphoid process as an Nx4 point series.
+    c7
+        Position of the C7 vertebra as an Nx4 point series.
+    t8
+        Position of the T8 vertebra as an Nx4 point series.
+
+    Returns
+    -------
+    np.ndarray
+        Local coordinate system for the thorax as an Nx4x4 transform series.
+        The origin is at the suprasternale notch, x points forward, y points
+        up, z points right.
+
+    """
+    return ktk.geometry.create_transform_series(
+        positions=sup, y=(0.5 * (sup + c7) - 0.5 * (px + t8)), xy=px - t8
+    )
+
+
+def _create_thorax_lcs_dumas2007(
     *, c7t1: ArrayLike, l5s1: ArrayLike, sup: ArrayLike
 ) -> np.ndarray:
+    """
+    Create thorax LCS to infer its centre of mass (Dumas et al., 2007).
+
+    Dumas, R., Chèze, L., Verriest, J.-P., 2007. Adjustments to McConville et
+    al. and Young et al. body segment inertial parameters. Journal of
+    Biomechanics 40, 543–553. https://doi.org/10.1016/j.jbiomech.2006.02.013
+
+    Parameters
+    ----------
+    c7t1
+        Position of the C7T1 joint centre as an Nx4 point series.
+    l5s1
+        Position of the L5S1 joint centre as an Nx4 point series.
+    sup
+        Position of the suprasternale notch as an Nx4 point series.
+
+    Returns
+    -------
+    np.ndarray
+        Local coordinate system for the thorax as an Nx4x4 transform series.
+        The origin is at the C7T1, x points forward, y points
+        up, z points right.
+
+    """
     return ktk.geometry.create_transform_series(
         positions=c7t1,
         y=(c7t1 - l5s1),
@@ -502,9 +715,33 @@ def create_thorax_lcs(
     )
 
 
-def create_head_neck_lcs(
+def _create_head_neck_lcs_dumas2007(
     *, c7t1: ArrayLike, hv: ArrayLike, sel: ArrayLike
 ) -> np.ndarray:
+    """
+    Create head+neck LCS to infer its centre of mass (Dumas et al., 2007).
+
+    Dumas, R., Chèze, L., Verriest, J.-P., 2007. Adjustments to McConville et
+    al. and Young et al. body segment inertial parameters. Journal of
+    Biomechanics 40, 543–553. https://doi.org/10.1016/j.jbiomech.2006.02.013
+
+    Parameters
+    ----------
+    c7t1
+        Position of the C7T1 joint centre as an Nx4 point series.
+    hv
+        Position of the head vertex as an Nx4 point series.
+    sel
+        Position of the sellion as an Nx4 point series.
+
+    Returns
+    -------
+    np.ndarray
+        Local coordinate system for the head and neck as an Nx4x4 transform
+        series. The origin is at the C7T1, x points forward, y points
+        up, z points right.
+
+    """
     return ktk.geometry.create_transform_series(
         positions=c7t1,
         y=(hv - c7t1),
@@ -512,9 +749,38 @@ def create_head_neck_lcs(
     )
 
 
-def create_arm_lcs(
+def create_arm_lcs_wu2005(
     *, gh: ArrayLike, lat_ep: ArrayLike, med_ep: ArrayLike, side: str = "R"
 ) -> np.ndarray:
+    """
+    Create upper arm LCS based on the ISB recommendations (Wu et al., 2005).
+
+    Wu, G., Van Der Helm, F.C.T., Veeger, H.E.J.D., Makhsous, M., Van Roy,
+    P., Anglin, C., Nagels, J., Karduna, A.R., McQuade, K., Wang, X.,
+    Werner, F.W., Buchholz, B., Others, 2005. ISB recommendation on definitions
+    of joint coordinate systems of various joints for the reporting of human
+    joint motion - Part II: shoulder, elbow, wrist and hand. Journal of
+    Biomechanics 38, 981–992. https://doi.org/10.1016/j.jbiomech.2004.05.042
+
+    Parameters
+    ----------
+    gh
+        Position of the glenohumeral joint as an Nx4 point series.
+    lat_ep
+        Position of the lateral epicondyle as an Nx4 point series.
+    med_ep
+        Position of the medial epicondyle as an Nx4 point series.
+    side
+        Either "R" or "L".
+
+    Returns
+    -------
+    np.ndarray
+        Local coordinate system for the upper arm as an Nx4x4 transform series.
+        The origin is at the glenohumeral joint, x points forward, y points
+        up, z points right.
+
+    """
     elbow_center = 0.5 * (lat_ep + med_ep)
     if side == "R":
         return ktk.geometry.create_transform_series(
@@ -532,13 +798,43 @@ def create_arm_lcs(
         raise ValueError("Side must be either 'R' or 'L'")
 
 
-def create_forearm_lcs(
+def create_forearm_lcs_wu2005(
     *,
     elbow_center: ArrayLike,
     ulnar_st: ArrayLike,
     radial_st: ArrayLike,
     side: str = "R",
 ) -> np.ndarray:
+    """
+    Create forearm LCS based on the ISB recommendations (Wu et al., 2005).
+
+    Wu, G., Van Der Helm, F.C.T., Veeger, H.E.J.D., Makhsous, M., Van Roy,
+    P., Anglin, C., Nagels, J., Karduna, A.R., McQuade, K., Wang, X.,
+    Werner, F.W., Buchholz, B., Others, 2005. ISB recommendation on definitions
+    of joint coordinate systems of various joints for the reporting of human
+    joint motion - Part II: shoulder, elbow, wrist and hand. Journal of
+    Biomechanics 38, 981–992. https://doi.org/10.1016/j.jbiomech.2004.05.042
+
+    Parameters
+    ----------
+    elbow_center
+        Middle point between the lateral and medial humeral epicondyles as an
+        Nx4 point series.
+    ulnar_st
+        Position of the ulnar styloid as an Nx4 point series.
+    radial_st
+        Position of the radial styloid as an Nx4 point series.
+    side
+        Either "R" or "L".
+
+    Returns
+    -------
+    np.ndarray
+        Local coordinate system for the forearm as an Nx4x4 transform series.
+        The origin is at the elbow centre, x points forward, y points
+        up, z points right.
+
+    """
     wrist_center = 0.5 * (ulnar_st + radial_st)
     if side == "R":
         return ktk.geometry.create_transform_series(
@@ -952,134 +1248,6 @@ def estimate_global_center_of_mass(
 
 
 # %% Constants
-
-#: A link model to help ktk.kinematics visualization
-LINKS = {
-    "Pelvis": {
-        "Links": [
-            ["AnteriorSuperiorIliacSpineR", "AnteriorSuperiorIliacSpineL"],
-            ["AnteriorSuperiorIliacSpineL", "PosteriorSuperiorIliacSpineL"],
-            ["PosteriorSuperiorIliacSpineL", "PosteriorSuperiorIliacSpineR"],
-            ["PosteriorSuperiorIliacSpineR", "AnteriorSuperiorIliacSpineR"],
-            ["AnteriorSuperiorIliacSpineR", "HipJointCenterR"],
-            ["PosteriorSuperiorIliacSpineR", "HipJointCenterR"],
-            ["AnteriorSuperiorIliacSpineL", "HipJointCenterL"],
-            ["PosteriorSuperiorIliacSpineL", "HipJointCenterL"],
-            ["AnteriorSuperiorIliacSpineR", "PubicSymphysis"],
-            ["AnteriorSuperiorIliacSpineL", "PubicSymphysis"],
-            ["HipJointCenterR", "PubicSymphysis"],
-            ["HipJointCenterL", "PubicSymphysis"],
-            ["HipJointCenterL", "HipJointCenterR"],
-        ],
-        "Color": [0.25, 0.5, 0.25],
-    },
-    "Trunk": {
-        "Links": [
-            ["L5S1JointCenter", "C7T1JointCenter"],
-            ["C7", "GlenohumeralJointCenterR"],
-            ["C7", "GlenohumeralJointCenterL"],
-            ["Suprasternale", "GlenohumeralJointCenterR"],
-            ["Suprasternale", "GlenohumeralJointCenterL"],
-            ["C7", "AcromionR"],
-            ["C7", "AcromionL"],
-            ["Suprasternale", "AcromionR"],
-            ["Suprasternale", "AcromionL"],
-            ["GlenohumeralJointCenterR", "AcromionR"],
-            ["GlenohumeralJointCenterL", "AcromionL"],
-        ],
-        "Color": [0.5, 0.5, 0],
-    },
-    "HeadNeck": {
-        "Links": [
-            ["Sellion", "C7T1JointCenter"],
-            ["HeadVertex", "C7T1JointCenter"],
-            ["Sellion", "HeadVertex"],
-        ],
-        "Color": [0.5, 0.5, 0.25],
-    },
-    "UpperArms": {
-        "Links": [
-            ["GlenohumeralJointCenterR", "ElbowJointCenterR"],
-            ["GlenohumeralJointCenterR", "LateralHumeralEpicondyleR"],
-            ["GlenohumeralJointCenterR", "MedialHumeralEpicondyleR"],
-            ["LateralHumeralEpicondyleR", "MedialHumeralEpicondyleR"],
-            ["GlenohumeralJointCenterL", "ElbowJointCenterL"],
-            ["GlenohumeralJointCenterL", "LateralHumeralEpicondyleL"],
-            ["GlenohumeralJointCenterL", "MedialHumeralEpicondyleL"],
-            ["LateralHumeralEpicondyleL", "MedialHumeralEpicondyleL"],
-        ],
-        "Color": [0.5, 0.25, 0],
-    },
-    "Forearms": {
-        "Links": [
-            ["ElbowJointCenterR", "WristJointCenterR"],
-            ["RadialStyloidR", "LateralHumeralEpicondyleR"],
-            ["UlnarStyloidR", "MedialHumeralEpicondyleR"],
-            ["RadialStyloidR", "UlnarStyloidR"],
-            ["ElbowJointCenterL", "WristJointCenterL"],
-            ["RadialStyloidL", "LateralHumeralEpicondyleL"],
-            ["UlnarStyloidL", "MedialHumeralEpicondyleL"],
-            ["RadialStyloidL", "UlnarStyloidL"],
-        ],
-        "Color": [0.5, 0, 0],
-    },
-    "Hands": {
-        "Links": [
-            ["RadialStyloidR", "CarpalMetaHead2R"],
-            ["UlnarStyloidR", "CarpalMetaHead5R"],
-            ["CarpalMetaHead2R", "CarpalMetaHead5R"],
-            ["RadialStyloidL", "CarpalMetaHead2L"],
-            ["UlnarStyloidL", "CarpalMetaHead5L"],
-            ["CarpalMetaHead2L", "CarpalMetaHead5L"],
-        ],
-        "Color": [0.5, 0, 0.25],
-    },
-    "Tighs": {
-        "Links": [
-            ["HipJointCenterR", "KneeJointCenterR"],
-            ["HipJointCenterR", "LateralFemoralEpicondyleR"],
-            ["HipJointCenterR", "MedialFemoralEpicondyleR"],
-            ["LateralFemoralEpicondyleR", "MedialFemoralEpicondyleR"],
-            ["HipJointCenterL", "KneeJointCenterL"],
-            ["HipJointCenterL", "LateralFemoralEpicondyleL"],
-            ["HipJointCenterL", "MedialFemoralEpicondyleL"],
-            ["LateralFemoralEpicondyleL", "MedialFemoralEpicondyleL"],
-        ],
-        "Color": [0, 0.5, 0.5],
-    },
-    "Legs": {
-        "Links": [
-            ["AnkleJointCenterR", "KneeJointCenterR"],
-            ["LateralMalleolusR", "LateralFemoralEpicondyleR"],
-            ["MedialMalleolusR", "MedialFemoralEpicondyleR"],
-            ["LateralMalleolusR", "MedialMalleolusR"],
-            ["AnkleJointCenterL", "KneeJointCenterL"],
-            ["LateralMalleolusL", "LateralFemoralEpicondyleL"],
-            ["MedialMalleolusL", "MedialFemoralEpicondyleL"],
-            ["LateralMalleolusL", "MedialMalleolusL"],
-        ],
-        "Color": [0, 0.25, 0.5],
-    },
-    "Feets": {
-        "Links": [
-            ["CalcaneusR", "TarsalMetaHead1R"],
-            ["CalcaneusR", "TarsalMetaHead5R"],
-            ["MedialMalleolusR", "TarsalMetaHead1R"],
-            ["LateralMalleolusR", "TarsalMetaHead5R"],
-            ["CalcaneusR", "MedialMalleolusR"],
-            ["CalcaneusR", "LateralMalleolusR"],
-            ["TarsalMetaHead1R", "TarsalMetaHead5R"],
-            ["CalcaneusL", "TarsalMetaHead1L"],
-            ["CalcaneusL", "TarsalMetaHead5L"],
-            ["MedialMalleolusL", "TarsalMetaHead1L"],
-            ["LateralMalleolusL", "TarsalMetaHead5L"],
-            ["CalcaneusL", "MedialMalleolusL"],
-            ["CalcaneusL", "LateralMalleolusL"],
-            ["TarsalMetaHead1L", "TarsalMetaHead5L"],
-        ],
-        "Color": [0.25, 0.0, 0.75],
-    },
-}
 
 
 # Load Inertial Values

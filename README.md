@@ -21,10 +21,10 @@ This package provides modules that are not included straight into kineticstoolki
 
 ### Currently in development
 
-|  Extension                                                                                                          |  Description                                                                  |
-|---------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
-|  [video](https://github.com/kineticstoolkit/kineticstoolkit_extensions/tree/main/kineticstoolkit_extensions/video)  |  Will allow reading video files to synchronize and add events to TimeSeries.  |
-
+|  Extension                                                                                                                          |  Description                                                                                    |
+|-------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------|
+|  [video](https://github.com/kineticstoolkit/kineticstoolkit_extensions/tree/main/kineticstoolkit_extensions/video)                  |  Will allow reading video files to synchronize and add events to TimeSeries.                    |
+|  [anthropometry](https://github.com/kineticstoolkit/kineticstoolkit_extensions/tree/main/kineticstoolkit_extensions/anthropometry)  |  Will allow estimating joint centres, centres of mass and generating local coordinate systems.  |
 
 ## Installing extensions
 
