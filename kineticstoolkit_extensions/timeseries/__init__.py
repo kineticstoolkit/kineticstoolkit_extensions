@@ -170,6 +170,7 @@ def ui_draw(
         time_range_in_pixels.sort()
     else:
         time_range_in_pixels = [min_time_in_pixels, max_time_in_pixels]
+        time_range = [0., 1.]
 
     # Get value range
     if value_range is not None:
@@ -184,6 +185,7 @@ def ui_draw(
         value_range_in_pixels.sort()
     else:
         value_range_in_pixels = [min_value_in_pixels, max_value_in_pixels]
+        value_range = [0., 1.]
 
     plt.close(fig)
 

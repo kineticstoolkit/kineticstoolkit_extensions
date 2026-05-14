@@ -31,6 +31,9 @@ __copyright__ = "Copyright (C) 2020-2025 Félix Chénier"
 __email__ = "chenier.felix@uqam.ca"
 __license__ = "Apache 2.0"
 
-import os
+import os as _os
 
-root_folder = os.path.dirname(os.path.dirname(__file__))
+root_folder = _os.path.dirname(_os.path.dirname(__file__))
+
+available_modules = ["n3d", "pushrimkinetics"]
+dev_modules = ["video", "anthropometry", "timeseries"]
