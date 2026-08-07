@@ -66,7 +66,11 @@ def read_nextwheel(filename: str, calibration_file: str) -> ktk.TimeSeries:
 
     data = nextwheel.read_dat(filename, calibration_file)
     ts = ktk.TimeSeries(time=data["Analog"].time)
-    ts.merge(data["Analog"], data_keys=["Forces", "Moments"], in_place=True)
+    ts.merge(
+        data["Analog"],
+        data_keys=["Channels", "Forces", "Moments"],
+        in_place=True,
+    )
 
     ts_angle = data["Encoder"].resample(ts.time, extrapolate=True)
     ts.merge(ts_angle, data_keys="Angle", in_place=True)
