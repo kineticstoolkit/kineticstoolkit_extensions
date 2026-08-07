@@ -62,6 +62,18 @@ def test_read_smartwheel():
     )
 
 
+def test_read_nextwheel():
+    """Test that nextwheel returns a structure similar to read_smartwheel."""
+    ts = pk.read_nextwheel(
+        this_folder + "/data/nextwheel.dat",
+        this_folder + "/data/nextwheel_calibration.json",
+    )
+    assert np.allclose(ts.data["Channels"].mean(), 37612.73624845749)
+    assert np.allclose(ts.data["Forces"].mean(), -1.9105986194916111)
+    assert np.allclose(ts.data["Moments"].mean(), 0.46255237817195616)
+    assert np.allclose(ts.data["Angle"].mean(), 79.42003277773614)
+
+
 def test_remove_offsets():
     """Test that remove_offsets works with and without a baseline."""
     kinetics = pk.read_smartwheel(
