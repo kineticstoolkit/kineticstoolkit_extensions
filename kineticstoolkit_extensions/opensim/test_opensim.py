@@ -24,12 +24,37 @@ __license__ = "Apache 2.0"
 
 
 import os
+import sys
+import kineticstoolkit as ktk
+from kineticstoolkit_extensions import opensim
 
 this_folder = os.path.dirname(__file__)
 
 
+# Find the python interpreter in the "opensim" conda environment, assuming
+# we are already in a conda environment.
+if ktk.config.is_pc:
+    env_dir = os.path.dirname(sys.executable)
+    opensim.configure(
+        python_path=os.path.dirname(env_dir) + "\\opensim\\python.exe"
+    )
+else:
+    env_dir = os.path.dirname(os.path.dirname(sys.executable))
+    opensim.configure(
+        python_path=os.path.dirname(env_dir) + "/opensim/bin/python"
+    )
+
+
+def test_run_scaling():
+    """Test the scaling operation."""
+    # !TODO Load something
+    opensim.run_scaling()
+    # !TODO Test something
+
+
 def test_write_trc():
     """TODO."""
+    pass
 
 
 if __name__ == "__main__":

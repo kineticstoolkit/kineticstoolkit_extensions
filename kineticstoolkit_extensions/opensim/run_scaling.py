@@ -22,4 +22,8 @@ __copyright__ = "Copyright (C) 2026 Mobility and Adaptive System Research Lab"
 __email__ = "chenier.felix@uqam.ca"
 __license__ = "Apache 2.0"
 
+
+import opensim
+
 #!TODO Write the code for a scaling operation
+print("I've been run. !TODO Remove this call at some point.")

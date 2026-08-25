@@ -64,7 +64,11 @@ def run_scaling() -> None:
 
     """
     # TODO Do something from the arguments
-    subprocess.call([config.python_path, "run_scaling.py"])
+    print(
+        subprocess.check_output(
+            [config.python_path, "run_scaling.py"]
+        ).decode()
+    )
     # TODO Do something and return it
 
 
