@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # Copyright 2020-2025 Félix Chénier
 
@@ -26,6 +25,7 @@ packages required by each extension. Please read the documentation of each
 extension to know which additionnal package to install.
 
 """
+
 __author__ = "Félix Chénier"
 __copyright__ = "Copyright (C) 2020-2025 Félix Chénier"
 __email__ = "chenier.felix@uqam.ca"

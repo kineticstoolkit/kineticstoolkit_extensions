@@ -1,5 +1,5 @@
 import kineticstoolkit.lab as ktk
-import numpy as np
+
 import kineticstoolkit_extensions.anthropometry as am
 
 markers = ktk.load(ktk.doc.download("anthropometrics_static.ktk.zip"))
@@ -234,17 +234,14 @@ markers.data["ElbowJointCenterL"] = 0.5 * (
 
 # Wrists
 markers.data["WristJointCenterR"] = 0.5 * (
-    markers.data["UlnarStyloidR"]
-    + markers.data["RadialStyloidR"]
+    markers.data["UlnarStyloidR"] + markers.data["RadialStyloidR"]
 )
 markers.data["WristJointCenterL"] = 0.5 * (
-    markers.data["UlnarStyloidL"]
-    + markers.data["RadialStyloidL"]
+    markers.data["UlnarStyloidL"] + markers.data["RadialStyloidL"]
 )
 
 player = ktk.Player(
     markers,
     interconnections=LINKS,  # Lines to better see the human shape
-    **viewpoint
+    **viewpoint,
 )
-

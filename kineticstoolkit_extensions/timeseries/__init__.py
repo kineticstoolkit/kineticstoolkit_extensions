@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # Copyright 2020-2025 Félix Chénier
 
@@ -26,9 +25,9 @@ __license__ = "Apache 2.0"
 
 
 import kineticstoolkit as ktk
-from kineticstoolkit.typing_ import ArrayLike, check_param
 import matplotlib.pyplot as plt
 import numpy as np
+from kineticstoolkit.typing_ import ArrayLike, check_param
 from PIL import Image, ImageGrab  # to import from clipboard
 
 
@@ -125,7 +124,6 @@ def ui_draw(
     value_in_pixels_dict = {}
 
     for data_key in data_keys:
-
         plt.title(
             f"Draw the curved named {data_key} using multiple left-clicks, \n"
             "Remove last point using right-click or DELETE, \n"
@@ -162,15 +160,14 @@ def ui_draw(
     # Get time range
     if time_range is not None:
         plt.title(
-            "Click on the time axis at \n"
-            f"t={time_range[0]}, then t={time_range[1]}",
+            f"Click on the time axis at \nt={time_range[0]}, then t={time_range[1]}",
         )
         plt.draw()
         time_range_in_pixels = np.array(plt.ginput(2, timeout=0))[:, 0]
         time_range_in_pixels.sort()
     else:
         time_range_in_pixels = [min_time_in_pixels, max_time_in_pixels]
-        time_range = [0., 1.]
+        time_range = [0.0, 1.0]
 
     # Get value range
     if value_range is not None:
@@ -185,7 +182,7 @@ def ui_draw(
         value_range_in_pixels.sort()
     else:
         value_range_in_pixels = [min_value_in_pixels, max_value_in_pixels]
-        value_range = [0., 1.]
+        value_range = [0.0, 1.0]
 
     plt.close(fig)
 
@@ -205,9 +202,7 @@ def ui_draw(
             value_range[1] - value_range[0]
         ) / (
             value_range_in_pixels[1] - value_range_in_pixels[0]
-        ) + value_range[
-            0
-        ]
+        ) + value_range[0]
 
         # Add the unit
         temp_ts = ktk.TimeSeries(time=time_in_pixels, data={key: value})

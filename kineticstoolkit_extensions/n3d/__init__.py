@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # Copyright 2022 Félix Chénier
 
@@ -26,10 +25,11 @@ __email__ = "chenier.felix@uqam.ca"
 __license__ = "Apache 2.0"
 
 
-from kineticstoolkit import TimeSeries
 import struct
+from collections.abc import Sequence
+
 import numpy as np
-from typing import Sequence
+from kineticstoolkit import TimeSeries
 
 
 def read_n3d(filename: str, labels: Sequence[str] = []) -> TimeSeries:
@@ -108,7 +108,6 @@ def read_n3d(filename: str, labels: Sequence[str] = []) -> TimeSeries:
             ts = ts.add_data_info(label, "Unit", "m")
 
     return ts
-
 
 
 if __name__ == "__main__":  # pragma: no cover

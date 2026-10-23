@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # Copyright 2025 Félix Chénier
 
@@ -37,15 +36,15 @@ __email__ = "chenier.felix@uqam.ca"
 __license__ = "Apache 2.0"
 
 
-import numpy as np
-from tqdm import tqdm
+import time
+
 import matplotlib.pyplot as plt
-from matplotlib import animation, widgets
+import numpy as np
 from kineticstoolkit import TimeSeries
 from kineticstoolkit.exceptions import warn_once
 from kineticstoolkit.typing_ import check_param
-import time
-
+from matplotlib import animation, widgets
+from tqdm import tqdm
 
 WINDOW_PLACEMENT = {"top": 50, "right": 0}
 
@@ -98,8 +97,7 @@ def read_video(
 
     """
     warn_once(
-        "Function read_video is experimental and will probably change in the "
-        "future."
+        "Function read_video is experimental and will probably change in the future."
     )
 
     # Type check
@@ -113,7 +111,7 @@ def read_video(
 
     # Import cv2 now, not on the top because opencv is not installed by
     # default.
-    import cv2  # noqa
+    import cv2
 
     video = cv2.VideoCapture(filename)
 

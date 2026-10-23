@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # Copyright 2026 Félix Chénier
 
@@ -18,15 +17,15 @@
 
 """Unit tests, to be run using pytest."""
 
-
 __author__ = "Félix Chénier"
 __copyright__ = "Copyright (C) 2026 Félix Chénier"
 __email__ = "chenier.felix@uqam.ca"
 __license__ = "Apache 2.0"
 
 
-import kineticstoolkit_extensions as ext
 import os
+
+import kineticstoolkit_extensions as ext
 
 
 def test_all_modules_listed():

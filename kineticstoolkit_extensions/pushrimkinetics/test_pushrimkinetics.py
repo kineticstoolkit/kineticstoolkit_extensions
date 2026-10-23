@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # Copyright 2020-2025 Félix Chénier
 
@@ -22,10 +21,11 @@ __email__ = "chenier.felix@uqam.ca"
 __license__ = "Apache 2.0"
 
 
-import kineticstoolkit_extensions.pushrimkinetics as pk
-import numpy as np
 import os
 
+import numpy as np
+
+import kineticstoolkit_extensions.pushrimkinetics as pk
 
 this_folder = os.path.dirname(__file__)
 

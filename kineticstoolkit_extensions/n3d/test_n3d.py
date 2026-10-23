@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # Copyright 2020-2025 Félix Chénier
 
@@ -18,17 +17,17 @@
 
 """Unit tests, to be run using pytest."""
 
-
 __author__ = "Félix Chénier"
 __copyright__ = "Copyright (C) 2020-2025 Félix Chénier"
 __email__ = "chenier.felix@uqam.ca"
 __license__ = "Apache 2.0"
 
 
-import kineticstoolkit_extensions.n3d as n3d
-import numpy as np
 import os
 
+import numpy as np
+
+from kineticstoolkit_extensions import n3d
 
 this_folder = os.path.dirname(__file__)
 

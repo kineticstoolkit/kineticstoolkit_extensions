@@ -1,10 +1,12 @@
 """Test code for UQAM gait lab."""
 
-import kineticstoolkit.lab as ktk
-from kineticstoolkit_extensions import anthropometry as am
-import numpy as np
-import matplotlib.pyplot as plt
 import os
+
+import kineticstoolkit.lab as ktk
+import matplotlib.pyplot as plt
+import numpy as np
+
+from kineticstoolkit_extensions import anthropometry as am
 
 # %% File selection and some settings
 
@@ -103,7 +105,7 @@ for side in ["R", "L"]:
     static_points.data[f"{side}HJC"] = am.infer_hip_joint_center_hara2016(
         rasis=static_points.data["RASI"],
         lasis=static_points.data["LASI"],
-        mpsis=0.5*(static_points.data["RPSI"]+static_points.data["LPSI"]),
+        mpsis=0.5 * (static_points.data["RPSI"] + static_points.data["LPSI"]),
         l_leg=l_leg,
         side=side,
     )

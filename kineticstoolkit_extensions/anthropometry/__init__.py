@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # Copyright 2020-2025 Félix Chénier
 
@@ -31,11 +30,12 @@ __email__ = "chenier.felix@uqam.ca"
 __license__ = "Apache 2.0"
 
 
+from io import StringIO
+
 import kineticstoolkit.lab as ktk
-from kineticstoolkit.typing_ import ArrayLike
 import numpy as np
 import pandas as pd
-from io import StringIO
+from kineticstoolkit.typing_ import ArrayLike
 
 # %% Tables
 
@@ -1234,7 +1234,6 @@ def estimate_global_center_of_mass(
         ]
 
         if len(segment_rel_mass) == 1:
-
             out.data["GlobalCenterOfMass"] += (
                 float(segment_rel_mass) * coms.data[data]
             )

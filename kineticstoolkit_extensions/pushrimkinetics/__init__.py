@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # Copyright 2020-2025 Félix Chénier
 
@@ -25,10 +24,11 @@ __email__ = "chenier.felix@uqam.ca"
 __license__ = "Apache 2.0"
 
 
+import struct  # to unpack binary data from SmartWheels' txt files
+
 import kineticstoolkit as ktk
 import numpy as np
 import pandas as pd
-import struct  # to unpack binary data from SmartWheels' txt files
 
 
 def __dir__():
@@ -62,7 +62,7 @@ def read_nextwheel(filename: str, calibration_file: str) -> ktk.TimeSeries:
         angle has been resampled to the forces and moments sample rate.
 
     """
-    import nextwheel  # noqa
+    import nextwheel
 
     data = nextwheel.read_dat(filename, calibration_file)
     ts = ktk.TimeSeries(time=data["Analog"].time)
@@ -93,7 +93,6 @@ def read_smartwheel(filename: str) -> ktk.TimeSeries:
 
     """
     if filename.lower().endswith(".csv"):
-
         dataframe = pd.read_csv(filename, delimiter=None, header=None)
         if dataframe.shape[1] == 1:  # Retry with ; as separator
             dataframe = pd.read_csv(filename, delimiter=";", header=None)
@@ -121,7 +120,6 @@ def read_smartwheel(filename: str) -> ktk.TimeSeries:
         ts = ts.add_data_info("Angle", "Unit", "rad")
 
     elif filename.lower().endswith(".txt"):
-
         data = {
             "ch1": [],
             "ch2": [],
@@ -134,7 +132,6 @@ def read_smartwheel(filename: str) -> ktk.TimeSeries:
 
         length = 0
         with open(filename, "rb") as fid:
-
             while True:
                 try:
                     _ = fid.read(2)
@@ -225,7 +222,6 @@ def _find_recovery_indices(Mz: np.ndarray) -> np.ndarray:
     threshold = 2.24  # (Nm): max tolerance for the remaining values.
 
     while np.nanmax(Mz) - np.nanmin(Mz) > threshold:
-
         # Remove 1% of data that are the farthest to the median:
 
         # Sort data
@@ -341,10 +337,10 @@ def remove_offsets(
 def apply_calibration(
     ts: ktk.TimeSeries,
     gains: np.ndarray | str,
-    offsets: np.ndarray = np.zeros((6)),
+    offsets: np.ndarray = np.zeros(6),
     *,
     transducer: str = "force_cell",
-    reference_frame: str = "wheel"
+    reference_frame: str = "wheel",
 ) -> ktk.TimeSeries:
     """
     Calculate pushrim forces and moments based on raw channel values.
@@ -384,7 +380,6 @@ def apply_calibration(
     """
     # Calculate the forces and moments and add to the output
     if transducer == "smartwheel":
-
         # Calculate the rotation angle to apply to the calculated ts
         if reference_frame == "wheel":
             theta = np.array([0.0])
@@ -452,14 +447,12 @@ def apply_calibration(
         )
 
     elif transducer == "force_cell":
-
         # Calculate the rotation angle to apply to the calculated ts
         if reference_frame == "wheel":
             theta = np.array([0.0])
         elif reference_frame == "hub":
             raise NotImplementedError(
-                "hub reference_frame not implemented yet"
-                "for force_cell transducers."
+                "hub reference_frame not implemented yetfor force_cell transducers."
             )
         else:
             raise ValueError("reference_frame must be 'wheel' or 'hub'")
