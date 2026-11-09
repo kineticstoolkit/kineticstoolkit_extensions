@@ -24,6 +24,8 @@ __copyright__ = "Copyright (C) 2026 Mobility and Adaptive System Research Lab"
 __email__ = "chenier.felix@uqam.ca"
 __license__ = "Apache 2.0"
 
+import os
+import sys
 import subprocess
 import kineticstoolkit.lab as ktk
 from kineticstoolkit import TimeSeries
@@ -55,7 +57,7 @@ def configure(python_path: str = "") -> None:
 
 
 
-def run_scaling(model : str, reference_xml : str, marker_xml : str, marker_ts : ktk.TimeSeries , mass : float , other_env : str, folder_output : str = None) -> dict:
+def run_scaling(model : str, reference_xml : str, marker_xml : str, marker_ts : ktk.TimeSeries , mass : float , folder_output : str = None) -> dict:
     """
     Run a scaling operation.
     
@@ -85,9 +87,7 @@ def run_scaling(model : str, reference_xml : str, marker_xml : str, marker_ts : 
     folder_output
         where you want to save new files
     
-    other_env
-        Opensim environment access path
-        
+            
     Returns
     -------
     arg
@@ -120,6 +120,30 @@ def run_scaling(model : str, reference_xml : str, marker_xml : str, marker_ts : 
 
     with open("args.json", "w", encoding="utf-8") as file:
         json.dump(args, file, indent=4, ensure_ascii=False)
+    
+    # Finding the Python executable in the environment that contains OpenSim
+    python_exe = None
+    
+    # Give the prefix of the current environment’s access path (miniconda3/envs for example)
+    envs_folder = Path(sys.prefix).parent
+    
+    # Browse all the environments and look where Opensim is imported 
+    if envs_folder.name == "envs":
+        for env in envs_folder.iterdir():
+            exe = env / ("python.exe" if os.name == "nt" else "bin/python") 
+            # python.exe for windows and bin/python for mac & linux
+            
+            if exe.exists() and exe != Path(sys.executable):
+                try:
+                    subprocess.run([str(exe), "-c", "import opensim"],
+                                   check=True, capture_output=True, timeout=120)
+                    python_exe = str(exe)
+                    break
+                except (subprocess.SubprocessError, OSError):
+                    continue
+
+    if python_exe is None:
+        return("No environment containing OpenSim was found.")
 
     # Recovery the run_scaling.py path
     root_folder = Path.cwd()
@@ -128,7 +152,7 @@ def run_scaling(model : str, reference_xml : str, marker_xml : str, marker_ts : 
     # Create a osim model and return it
     # Launch of run_scaling.py
     output = subprocess.check_output(
-        [other_env, path_folder],
+        [python_exe, path_folder],
         text=True  
         )
     print(output)

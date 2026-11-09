@@ -65,10 +65,6 @@ if __name__ == "__main__":
     pytest.main([__file__])
 
 def test_scaling() :
-    """" 
-    Pour le bon fonctionnement de ce test merci de déposer les fichiers 
-    test dans le dossier data de kineticstoolkit_extension 
-    """
     
     # Finding the folder where test_opensim.py is located
     root_folder = Path(__file__).parent
@@ -91,32 +87,10 @@ def test_scaling() :
     ts = read_trc(path_data[-1])
     mass = 72.60
 
-    # Finding the Python executable in the environment that contains OpenSim
-    python_exe = None
-    
-    # Give the prefix of the current environment’s access path (miniconda3/envs for example)
-    envs_folder = Path(sys.prefix).parent
-    
-    # Browse all the environments and look where Opensim is imported 
-    if envs_folder.name == "envs":
-        for env in envs_folder.iterdir():
-            exe = env / ("python.exe" if os.name == "nt" else "bin/python")
-            
-            if exe.exists() and exe != Path(sys.executable):
-                try:
-                    subprocess.run([str(exe), "-c", "import opensim"],
-                                   check=True, capture_output=True, timeout=120)
-                    python_exe = str(exe)
-                    break
-                except (subprocess.SubprocessError, OSError):
-                    continue
-
-    if python_exe is None:
-        pytest.skip("No environment containing OpenSim was found.")
     
     
     # Testing the run_scaling function
-    final_result = run_scaling(path_data[0], path_data[1], path_data[2], ts, mass,python_exe)
+    final_result = run_scaling(path_data[0], path_data[1], path_data[2], ts, mass)
     assert final_result is not None
 
 
