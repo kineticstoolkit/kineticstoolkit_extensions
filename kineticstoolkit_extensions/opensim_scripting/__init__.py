@@ -28,7 +28,6 @@ import subprocess
 import kineticstoolkit.lab as ktk
 from kineticstoolkit import TimeSeries
 import json
-import numpy as np
 from pathlib import Path
 
 
@@ -95,16 +94,8 @@ def run_scaling(model : str, reference_xml : str, marker_xml : str, marker_ts : 
         Dictionary composed of the access paths of all the files necessary for this 
         function and created during it
     
-    
-    
-    
-    This function will take its input and create the required TRC from it,
-    then launch a process that runs "run_scaling.py", and finally open the
-    results, process it and return it.
-    
-
     """
-    # Definition du dossier de sorti s'il n'a pas été donné en entrée
+    # Definition of the exit folder if it was not given as an input
     if folder_output is None:
         folder_output = Path.cwd().as_posix()
         
@@ -116,7 +107,7 @@ def run_scaling(model : str, reference_xml : str, marker_xml : str, marker_ts : 
     chemin_trc = Path(output_file).resolve().as_posix()
     
     # Json file creation    
-    # On utilise ici Path pour homogénéiser les structures des chemins d'accès
+    # Here, we use Path to homogenize the structures of access paths
     args = {
         "model_input" : Path(model).resolve().as_posix(), 
         "scale_input" : Path(reference_xml).resolve().as_posix(),
@@ -130,7 +121,7 @@ def run_scaling(model : str, reference_xml : str, marker_xml : str, marker_ts : 
     with open("args.json", "w", encoding="utf-8") as file:
         json.dump(args, file, indent=4, ensure_ascii=False)
 
-    # Retrieving the run_scaling.py path
+    # Recovery the run_scaling.py path
     root_folder = Path.cwd()
     path_folder = (root_folder/"run_scaling.py").as_posix()
     

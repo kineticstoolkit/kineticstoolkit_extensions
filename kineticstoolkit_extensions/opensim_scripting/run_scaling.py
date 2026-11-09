@@ -27,21 +27,26 @@ import json
 import shutil
 from pathlib import Path
 
-"""
-args = {"model_input" : "C:/Users/domit/Documents/Domitille/test/CaptureTestFinal.osim",
-"scale_input" : "C:/Users/domit/Documents/Domitille/test/Scale_Settings_test.xml",
-"marker_xml" : "C:/Users/domit/Documents/Domitille/test/CaptureTestmarkers.xml",
-"marker_trc": "C:/Users/domit/Documents/Domitille/test/n_pose_001_1.trc",
-"mass" : 80,
-"folder_output" : "C:/Users/domit/OneDrive - Fondation EPF/4A"}
-"""
 
+
+"""
+Example of our ARGS file : 
+    args = {"model_input" : "C:/Users/model.osim",
+            "scale_input" : "C:/Users/scale.xml",
+            "marker_xml" : "C:/Users/markers.xml",
+            "marker_trc": "C:/Users/marker.trc",
+            "mass" : 80,
+            "folder_output" : "C:/Users/output"}
+"""
 
 
 # Loading data from json file
 with open("args.json", "r", encoding="utf-8") as file:
     args = json.load(file)
 print(args)
+
+
+
 
 # Creating model scaled
 script_dir = Path(args["folder_output"])
@@ -69,12 +74,12 @@ model_scaler.setApply(True)
 model_scaler.setMarkerFileName(args["marker_trc"])
 
 marker_placer = scale_tool.getMarkerPlacer()
-# setApply sert à replacer les marqueurs après la mise à l'échelle des os
+# setApply is used to replace the markers after scaling bones
 marker_placer.setApply(True)
 marker_placer.setMarkerFileName(args["marker_trc"])
 marker_placer.setOutputModelFileName(model_output)
 
-# Ecriture des modifications faites avant dans le XML
+# Writing the changes just made before in the XML
 scale_tool.printToXML(scale)
 
 if not scale_tool.run():
@@ -85,21 +90,20 @@ scaled_model = osim.Model(model_output)
 scaled_model.initSystem()
 print(scaled_model)
 
-# Ajout de nouvelles valeurs dans le dictionnaire
+# Adding new values to the dictionary
 args["model_output"] = model_output
 args["scale_output"] = dest
 
-#Ecriture fichier json
+#Writing JSON file
 with open("args.json", "w", encoding="utf-8") as file:
     json.dump(args, file, indent=4, ensure_ascii=False)
 print("Données sauvegardées avec succès !")
 
-# Copie du fichier Json et enregistrement dans le dossier de sortie
+# Copy the JSON file and save it in the output folder if the output file is different from the current folder
 path_json = Path(script_dir / "args.json")
-shutil.copy("args.json", path_json)
+if Path("args.json").resolve() != path_json : 
+    shutil.copy("args.json", path_json)
 
-#!TODO Write the code for a scaling operation
-print("I've been run. !TODO Remove this call at some point.")
 
 
 
