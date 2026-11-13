@@ -26,13 +26,12 @@ __license__ = "Apache 2.0"
 import os
 import sys
 import warnings
-import subprocess
 import numpy as np
 import pandas as pd
 from pathlib import Path
 import kineticstoolkit as ktk
 from kineticstoolkit_extensions import opensim_scripting as opensim
-from __init__ import run_scaling
+from __init__ import run_scaling, write_trc
 
 
 this_folder = os.path.dirname(__file__)
@@ -55,8 +54,14 @@ else:
 
 
 def test_write_trc():
-    """TODO."""
-    pass
+    # Finding the folder where test_opensim.py is located
+    root_folder = Path(__file__).parent
+    name_marker_trc = "subject01_static.trc"
+    path_folder = (root_folder/"data"/name_marker_trc).as_posix()
+    ts = read_trc(path_folder)
+    output_path = (root_folder / "new_file.trc")
+    write_trc(output_path.as_posix(), ts)
+    assert output_path.exists()
 
 
 if __name__ == "__main__":
@@ -65,6 +70,10 @@ if __name__ == "__main__":
     pytest.main([__file__])
 
 def test_scaling() :
+    """
+    WARNING : Define the configuration in the __init__ file
+    
+    """
     
     # Finding the folder where test_opensim.py is located
     root_folder = Path(__file__).parent
@@ -86,8 +95,6 @@ def test_scaling() :
     # Transformation of the trc into TimeSeries    
     ts = read_trc(path_data[-1])
     mass = 72.60
-
-    
     
     # Testing the run_scaling function
     final_result = run_scaling(path_data[0], path_data[1], path_data[2], ts, mass)
