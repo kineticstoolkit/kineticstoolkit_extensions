@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Test the pushrimkinetics extension."""
 
 __author__ = "Félix Chénier"
 __copyright__ = "Copyright (C) 2020-2025 Félix Chénier"
@@ -39,6 +40,7 @@ TEST_CALIBRATION_MATRIX = {
 
 def test_read_smartwheel():
     """Test that read_file works similarly for SW's csv and txt files."""
+    STD_MAX_ERROR = 1e-4
     kinetics_csv = pk.read_smartwheel(
         this_folder + "/data/pushrimkinetics_propulsion.csv", delimiter=";"
     )
@@ -58,7 +60,7 @@ def test_read_smartwheel():
             kinetics_csv.data["Angle"][0:smaller]
             - kinetics_txt.data["Angle"][0:smaller]
         )
-        < 1e-4
+        < STD_MAX_ERROR
     )
 
 
@@ -76,6 +78,8 @@ def test_read_nextwheel():
 
 def test_remove_offsets():
     """Test that remove_offsets works with and without a baseline."""
+    FORCE_TOLERANCE = 1
+    MOMENT_TOLERANCE = 0.1
     kinetics = pk.read_smartwheel(
         this_folder + "/data/pushrimkinetics_offsets_propulsion.csv"
     )
@@ -87,14 +91,16 @@ def test_remove_offsets():
     no_offsets1 = pk.remove_offsets(kinetics)
     no_offsets2 = pk.remove_offsets(kinetics, baseline)
 
-    # Assert that all force differences are within 1 N
+    # Assert that all force differences are within tolerance
     assert np.all(
-        np.abs(no_offsets1.data["Forces"] - no_offsets2.data["Forces"]) < 1
+        np.abs(no_offsets1.data["Forces"] - no_offsets2.data["Forces"])
+        < FORCE_TOLERANCE
     )
 
-    # Assert that all moment differences are within 0.1 Nm
+    # Assert that all moment differences are within tolerance
     assert np.all(
-        np.abs(no_offsets1.data["Moments"] - no_offsets2.data["Moments"]) < 0.1
+        np.abs(no_offsets1.data["Moments"] - no_offsets2.data["Moments"])
+        < MOMENT_TOLERANCE
     )
 
 

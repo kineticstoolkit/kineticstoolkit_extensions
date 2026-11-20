@@ -51,6 +51,7 @@ WINDOW_PLACEMENT = {"top": 50, "right": 0}
 
 def read_video(
     filename: str,
+    *,
     original_fps: float | None = None,
     width: int | None = None,
     height: int | None = None,
@@ -97,7 +98,8 @@ def read_video(
 
     """
     warn_once(
-        "Function read_video is experimental and will probably change in the future."
+        "Function read_video is experimental and will probably change in the "
+        "future."
     )
 
     # Type check
@@ -111,7 +113,7 @@ def read_video(
 
     # Import cv2 now, not on the top because opencv is not installed by
     # default.
-    import cv2
+    import cv2  # noqa PLC0415 `import` should be at the top-level of a file
 
     video = cv2.VideoCapture(filename)
 
@@ -190,7 +192,8 @@ def ui_edit_events(
     ts_video: TimeSeries,
     ts_data: TimeSeries,
     video_key: str = "Video",
-    data_keys: str | list[str] = [],
+    data_keys: str | list[str] = None,
+    *,
     event_source: str = "merge",
     in_place: bool = False,
 ) -> list[TimeSeries]:
@@ -231,6 +234,8 @@ def ui_edit_events(
         share the events.
 
     """
+    if data_keys is None:
+        data_keys = []
     warn_once(
         "Function ui_edit_events is experimental and will probably change in "
         "the future."
@@ -290,10 +295,12 @@ class Video:
         ts_data: TimeSeries | None,
         *,
         video_key: str = "Video",
-        data_keys: str | list[str] = [],
+        data_keys: str | list[str] = None,
         event_source: str = "merge",
     ):
 
+        if data_keys is None:
+            data_keys = []
         self._closed = False
 
         self._video_key = video_key
@@ -375,6 +382,15 @@ class Video:
         index = int(np.argmin(np.abs(self._ts_video.time - value)))
         self.current_index = index
 
+    def _create_gui_video(self):
+        """Create the video part of the GUI."""
+        self._axes["Video"].set_frame_on(True)
+        self._axes_image = self._axes["Video"].imshow(
+            self._ts_video.data[self._video_key][0],
+            interpolation="none",
+            resample=False,
+        )
+
     def _create_gui(self):
         """Create all the GUI elements."""
         # Remove default keymaps for left and right
@@ -385,6 +401,7 @@ class Video:
 
         # Create the figure
         # fmt: off
+        # ruff: disable[E501] Line too long
         self._figure, self._axes = plt.subplot_mosaic(
             [
                 ["LblNextIndex",  "LblNextIndex", "Video",    "LblEvent",     "LblEvent"],
@@ -404,6 +421,7 @@ class Video:
             width_ratios=[1, 1, 20, 1, 1],
             height_ratios=[1,1, 1, 1,1, 1, 1, 1, 1, 1, 1, 1.5, 6],
         )
+        # ruff: enable[E501] Line too long
         # fmt: on
 
         # Remove frames and ticks for all for now
@@ -413,12 +431,7 @@ class Video:
             self._axes[key].set_yticks([])
 
         # Create the video part
-        self._axes["Video"].set_frame_on(True)
-        self._axes_image = self._axes["Video"].imshow(
-            self._ts_video.data[self._video_key][0],
-            interpolation="none",
-            resample=False,
-        )
+        self._create_gui_video()
 
         # Create the data part
         self._axes_data = self._axes["Data"]
@@ -506,7 +519,6 @@ class Video:
 
         # Connect callbacks to the figure
         self._figure.canvas.mpl_connect("key_press_event", self._on_key)
-        # self._figure.canvas.mpl_connect("key_release_event", self._on_release)
         self._figure.canvas.mpl_connect("scroll_event", self._on_scroll)
         self._figure.canvas.mpl_connect("pick_event", self._on_pick)
         self._figure.canvas.mpl_connect("close_event", self._on_close)
@@ -523,7 +535,7 @@ class Video:
         self.current_index -= 1
 
     def _on_next_event(self, event):
-        for i, one_event in enumerate(self._ts_video.events):
+        for _i, one_event in enumerate(self._ts_video.events):
             if one_event.time > self.current_time:
                 self.current_time = one_event.time
                 break
@@ -531,7 +543,7 @@ class Video:
         self._refresh()
 
     def _on_previous_event(self, event):
-        for i, one_event in enumerate(self._ts_video.events[-1::-1]):
+        for _i, one_event in enumerate(self._ts_video.events[-1::-1]):
             if one_event.time < self.current_time:
                 self.current_time = one_event.time
                 break
