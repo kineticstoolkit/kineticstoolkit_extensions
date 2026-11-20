@@ -25,15 +25,16 @@ __email__ = "chenier.felix@uqam.ca"
 __license__ = "Apache 2.0"
 
 
+import json
+import os
 import subprocess
 import warnings
-import pandas as pd
-import numpy as np
-import kineticstoolkit.lab as ktk
-from kineticstoolkit import TimeSeries
-import json
 from pathlib import Path
 
+import kineticstoolkit.lab as ktk
+import numpy as np
+import pandas as pd
+from kineticstoolkit import TimeSeries
 
 
 class Config:
@@ -43,6 +44,7 @@ class Config:
 
 
 config = Config()
+this_folder = os.path.dirname(__file__)
 
 
 def configure(python_path: str = "") -> None:
@@ -58,18 +60,22 @@ def configure(python_path: str = "") -> None:
     config.python_path = python_path
 
 
-configure() # Enter the path to your OpenSim environment
-
-
-def run_scaling(model : str, reference_xml : str, marker_xml : str, marker_ts : ktk.TimeSeries , mass : float , folder_output : str = None) -> dict:
+def run_scaling(
+    model: str,
+    reference_xml: str,
+    marker_xml: str,
+    marker_ts: ktk.TimeSeries,
+    mass: float,
+    folder_output: str = None,
+) -> dict:
     """
     Run a scaling operation.
 
     Caution
     -------
-    Please, make sure you have an existing Opensim environment on your computer
-    Define the configuration in the before run the function
-    Remember that your entries are in the format: r"C:\..."
+    Please, make sure you have an existing Opensim environment on your
+    computer, and configure the module to use it, using:
+    configure(path_to_python)
 
     Parameters
     ----------
@@ -104,36 +110,34 @@ def run_scaling(model : str, reference_xml : str, marker_xml : str, marker_ts : 
     if folder_output is None:
         folder_output = Path.cwd().as_posix()
 
-
     # Creation of a TRC file based on the TimeSerie
     output_dir = Path(folder_output)
-    output_file = (output_dir/"marker_trc.trc").as_posix()
+    output_file = (output_dir / "marker_trc.trc").as_posix()
     write_trc(output_file, marker_ts)
     chemin_trc = Path(output_file).resolve().as_posix()
 
     # Json file creation
     # Here, we use Path to homogenize the structures of access paths
     args = {
-        "model_input" : Path(model).resolve().as_posix(),
-        "scale_input" : Path(reference_xml).resolve().as_posix(),
-        "marker_xml" : Path(marker_xml).resolve().as_posix(),
-        "marker_trc" : chemin_trc,
-        "mass" : mass,
-        "folder_output" : Path(folder_output).resolve().as_posix(),
-        }
-
+        "model_input": Path(model).resolve().as_posix(),
+        "scale_input": Path(reference_xml).resolve().as_posix(),
+        "marker_xml": Path(marker_xml).resolve().as_posix(),
+        "marker_trc": chemin_trc,
+        "mass": mass,
+        "folder_output": Path(folder_output).resolve().as_posix(),
+    }
 
     with open("args.json", "w", encoding="utf-8") as file:
         json.dump(args, file, indent=4, ensure_ascii=False)
 
     print(
         subprocess.check_output(
-            [config.python_path, "run_scaling.py"]
+            [config.python_path, this_folder + "/run_scaling.py"]
         ).decode()
     )
 
     # Loading the modified json file
-    with open("args.json", "r", encoding="utf-8") as file:
+    with open("args.json", encoding="utf-8") as file:
         args = json.load(file)
 
     return args
@@ -149,13 +153,15 @@ def read_trc(filename: str) -> ktk.TimeSeries:
         Path of the file trc
 
     Returns
-    ----------
+    -------
     ts
         TimeSeries from the starting trc file
 
     """
     # Reading the 3rd line (1-2nd lines not necessary to build a TimeSeries)
-    header_meta = pd.read_csv(filename, sep="\t", skiprows=2, nrows=1, header=None)
+    header_meta = pd.read_csv(
+        filename, sep="\t", skiprows=2, nrows=1, header=None
+    )
     # Recovery values from Data_rate and Camera_rate
     data_rate = float(header_meta.iloc[0, 2])
     camera_rate = float(header_meta.iloc[0, 1])
@@ -166,22 +172,28 @@ def read_trc(filename: str) -> ktk.TimeSeries:
         units = "m"
 
     # Reading the 4th line
-    raw_markers = pd.read_csv(filename, sep="\t", skiprows=3, nrows=1, header=None)
+    raw_markers = pd.read_csv(
+        filename, sep="\t", skiprows=3, nrows=1, header=None
+    )
 
     # Creating a list of marker names by removing unnecessary spaces
-    marker_names = [str(col).strip() for col in raw_markers.iloc[0, 2:].dropna() if str(col).strip()]
+    marker_names = [
+        str(col).strip()
+        for col in raw_markers.iloc[0, 2:].dropna()
+        if str(col).strip()
+    ]
 
     # skiprows=6 skips the first 6 lines to get the raw data
     df = pd.read_csv(filename, sep=r"\s+", skiprows=6, header=None)
 
     # We filter to keep only the digital lines
-    #errors = "coerce" transforms untransformed character strings into numbers, in NAN
+    # errors = "coerce" transforms untransformed character strings into numbers, in NAN
 
     df = df.apply(pd.to_numeric, errors="coerce")
 
     # Time Recovery (2nd column of the DataFrame)
     time = df.iloc[:, 1].to_numpy()
-    n_frames = len(time)  #nb de frame
+    n_frames = len(time)  # nb de frame
 
     # Reconstruction of the 4D dictionary for KTK
     data = {}
@@ -196,12 +208,16 @@ def read_trc(filename: str) -> ktk.TimeSeries:
         data_4d[:, :3] = xyz
         data[key] = data_4d
 
-        col_idx += 3 #transition to the next marker’s coordinates
+        col_idx += 3  # transition to the next marker’s coordinates
 
     # Recovery of the informations
-    info = {"Time": {"Unit": "s"},
-            "Header": {"DataRate": str(data_rate),
-            "Camera_rate" : str(camera_rate)}}
+    info = {
+        "Time": {"Unit": "s"},
+        "Header": {
+            "DataRate": str(data_rate),
+            "Camera_rate": str(camera_rate),
+        },
+    }
 
     for key in marker_names:
         info[key] = {"Unit": units}
@@ -209,13 +225,15 @@ def read_trc(filename: str) -> ktk.TimeSeries:
     ts = ktk.TimeSeries(data=data, time=time, info=info)
 
     # We check that the data recording is regular; if it is not, we manually calculate the time of the timeout.
-    warnings.warn("If your TimeSerie data is not calculated at regular intervals, it is mandatory to manually calculate the time for a sample")
+    warnings.warn(
+        "If your TimeSerie data is not calculated at regular intervals, it is mandatory to manually calculate the time for a sample"
+    )
 
     if np.isnan(ts.get_sample_rate()):
         start = time[0]
         stop = time[-1]
         n_sample = len(time)
-        ts.time = np.linspace(start, stop,n_sample)
+        ts.time = np.linspace(start, stop, n_sample)
 
     return ts
 
@@ -281,7 +299,6 @@ def write_trc(filename: str, points: TimeSeries) -> None:
                 for key in points.data
             )
             fid.write("\n")
-
 
 
 if __name__ == "__main__":  # pragma: no cover

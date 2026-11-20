@@ -23,6 +23,7 @@ allow-magic-value-types = ["int", "str", "bytes"]
 [tool.mypy]
 exclude = [
 ]
+disable_error_code = ["import-untyped", "import-not-found"]
 
 [tool.pytest.ini_options]
 filterwarnings = [

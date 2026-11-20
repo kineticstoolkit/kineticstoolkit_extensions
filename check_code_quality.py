@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 """Check code quality before creating a code request."""
 
-import os
 import subprocess
-import webbrowser
 
 
 def _run_and_print(command: list[str]) -> None:
@@ -34,7 +32,7 @@ def run_static_type_checker() -> None:  # pragma: no cover
     """Run static typing checker (mypy)."""
     print("========================================")
     print("Checking Static Types (mypy)")
-    _run_and_print(["mypy", "src"])
+    _run_and_print(["mypy", "kineticstoolkit_extensions"])
 
 
 def run_unit_tests() -> None:  # pragma: no cover
@@ -52,9 +50,6 @@ def run_unit_tests() -> None:  # pragma: no cover
         ]
     )
     subprocess.call(["coverage", "html", "-d", "reports/coverage"])
-    webbrowser.open_new_tab(
-        "file://" + os.path.abspath("reports/coverage/index.html")
-    )
 
 
 if __name__ == "__main__":  # pragma: no cover

@@ -22,12 +22,11 @@ __copyright__ = "Copyright (C) 2026 Mobility and Adaptive System Research Lab"
 __email__ = "chenier.felix@uqam.ca"
 __license__ = "Apache 2.0"
 
-import opensim as osim
 import json
 import shutil
 from pathlib import Path
 
-
+import opensim as osim
 
 """
 Example of our ARGS file : 
@@ -41,11 +40,9 @@ Example of our ARGS file :
 
 
 # Loading data from json file
-with open("args.json", "r", encoding="utf-8") as file:
+with open("args.json", encoding="utf-8") as file:
     args = json.load(file)
 print(args)
-
-
 
 
 # Creating model scaled
@@ -53,14 +50,13 @@ script_dir = Path(args["folder_output"])
 model_output = (script_dir / "Model_Output.osim").as_posix()
 
 # Creating scale xml copy
-dest = Path(script_dir/ "Scale_Output.xml").as_posix()
+dest = Path(script_dir / "Scale_Output.xml").as_posix()
 scale = shutil.copy(args["scale_input"], dest)
 
- 
 
 # Upload XML scaling
 scale_tool = osim.ScaleTool(scale)
-#Avoid path conflicts
+# Avoid path conflicts
 scale_tool.setPathToSubject("")
 
 scale_tool.setSubjectMass(args["mass"])
@@ -83,8 +79,8 @@ marker_placer.setOutputModelFileName(model_output)
 scale_tool.printToXML(scale)
 
 if not scale_tool.run():
-        raise RuntimeError("Scaling failed, check opensim.log")
-else :
+    raise RuntimeError("Scaling failed, check opensim.log")
+else:
     print("scale successfull execute")
 scaled_model = osim.Model(model_output)
 scaled_model.initSystem()
@@ -94,22 +90,12 @@ print(scaled_model)
 args["model_output"] = model_output
 args["scale_output"] = dest
 
-#Writing JSON file
+# Writing JSON file
 with open("args.json", "w", encoding="utf-8") as file:
     json.dump(args, file, indent=4, ensure_ascii=False)
 print("Données sauvegardées avec succès !")
 
 # Copy the JSON file and save it in the output folder if the output file is different from the current folder
 path_json = Path(script_dir / "args.json")
-if Path("args.json").resolve() != path_json : 
+if Path("args.json").resolve() != path_json:
     shutil.copy("args.json", path_json)
-
-
-
-
-
-
-
-
-
-

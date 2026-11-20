@@ -26,10 +26,10 @@ __license__ = "Apache 2.0"
 import os
 import sys
 from pathlib import Path
-import kineticstoolkit as ktk
-from kineticstoolkit_extensions import opensim_scripting as opensim
-from kineticstoolkit_extensions.opensim_scripting import run_scaling, write_trc, read_trc
 
+import kineticstoolkit as ktk
+
+from kineticstoolkit_extensions import opensim_scripting as opensim
 
 this_folder = os.path.dirname(__file__)
 
@@ -48,25 +48,22 @@ else:
     )
 
 
-
-
 def test_write_trc():
     # Finding the folder where test_opensim.py is located
     root_folder = Path(__file__).parent
     name_marker_trc = "subject01_static.trc"
-    path_folder = (root_folder/"data"/name_marker_trc).as_posix()
-    ts = read_trc(path_folder)
-    output_path = (root_folder / "new_file.trc")
-    write_trc(output_path.as_posix(), ts)
+    path_folder = (root_folder / "data" / name_marker_trc).as_posix()
+    ts = opensim.read_trc(path_folder)
+    output_path = root_folder / "new_file.trc"
+    opensim.write_trc(output_path.as_posix(), ts)
     assert output_path.exists()
 
 
-def test_scaling() :
+def test_scaling():
     """
     WARNING : Define the configuration in the __init__ file
 
     """
-
     # Finding the folder where test_opensim.py is located
     root_folder = Path(__file__).parent
 
@@ -76,24 +73,23 @@ def test_scaling() :
     name_reference_xml = "subject01_Setup_Scale.xml"
     name_marker_xml = "gait2354_Scale_MarkerSet.xml"
     name_marker_trc = "subject01_static.trc"
-    datas = [name_model,name_reference_xml,name_marker_xml,name_marker_trc]
+    datas = [name_model, name_reference_xml, name_marker_xml, name_marker_trc]
 
     # Path to the files in the 'data' folder
     path_data = []
     for i in datas:
-        path_folder = root_folder/"data"/i
+        path_folder = root_folder / "data" / i
         path_data.append(path_folder.as_posix())
 
     # Transformation of the trc into TimeSeries
-    ts = read_trc(path_data[-1])
+    ts = opensim.read_trc(path_data[-1])
     mass = 72.60
 
     # Testing the run_scaling function
-    final_result = run_scaling(path_data[0], path_data[1], path_data[2], ts, mass)
+    final_result = opensim.run_scaling(
+        path_data[0], path_data[1], path_data[2], ts, mass
+    )
     assert final_result is not None
-
-
-
 
 
 if __name__ == "__main__":
