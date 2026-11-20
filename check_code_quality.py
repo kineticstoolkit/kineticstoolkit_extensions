@@ -53,10 +53,18 @@ def run_unit_tests() -> None:  # pragma: no cover
 
 
 if __name__ == "__main__":  # pragma: no cover
+    # %%
     run_style_formatter()
+
+    # %%
     run_linter()
+
+    # %%
     run_static_type_checker()
+
+    # %%
     run_unit_tests()
+
     print("========================================")
     print("Completed.")
     print("Do not forget to merge main into your")
