@@ -82,7 +82,7 @@ INERTIA = _read_markdown_table("""
 | Foot      | Dumas2007    | AnkleJointCenter            | TarsalMetaHeadM15           | AnkleJointCenter            | M      |  0.183 |   0.012 |   0.382 |  -0.151 |   0.026 |   0.17 |   0.37 |   0.36 | 0.13   | 0.08j  | 0.00   |
 | Foot      | Dumas2007Alt | Calcaneum                   | ToeTip1                     | Calcaneum                   | F      |  0.233 |   0.01  |   0.443 |   0.044 |  -0.025 |   0.12 |   0.25 |   0.25 | 0.07j  | 0.05   | 0.03j  |
 | Foot      | Dumas2007Alt | Calcaneum                   | ToeTip1                     | Calcaneum                   | M      |  0.265 |   0.012 |   0.436 |  -0.025 |  -0.007 |   0.11 |   0.25 |   0.25 | 0.09   | 0.06j  | 0.00   |
-""")
+""")  # noqa: E501 Line too long
 
 # fmt: on
 
@@ -407,6 +407,7 @@ def _infer_ankle_joint_center_davis1991(
 
 
 def infer_c7t1_joint_center_dumas2018(
+    *,
     c7: ArrayLike,
     l5s1: ArrayLike,
     sup: ArrayLike,
@@ -475,6 +476,7 @@ def infer_c7t1_joint_center_dumas2018(
 
 
 def infer_gh_joint_center_rab2002(
+    *,
     c7: ArrayLike,
     l5s1: ArrayLike,
     sup: ArrayLike,
@@ -484,7 +486,7 @@ def infer_gh_joint_center_rab2002(
     side: str = "R",
 ) -> np.ndarray:
     """
-    Infer glenohumeral joint centre based on thorax regression (Rab et al., 2002).
+    Infer GH joint centre based on thorax regression (Rab et al., 2002).
 
     GH joint centres are inferred using Rab, G., Petuskey, K., Bagley, A.,
     2002. A method for determination of upper extremity ktk.kinematics.
@@ -859,6 +861,7 @@ def create_hand_lcs(
     meta_head5: ArrayLike,
     side: str = "R",
 ) -> np.ndarray:
+    """Create Hand LCS based on wrist center and meta head 2 and 5."""
     meta_center = 0.5 * (meta_head2 + meta_head5)
     if side == "R":
         return ktk.geometry.create_transform_series(
@@ -883,6 +886,7 @@ def create_thigh_lcs_isb(
     medial_ep: ArrayLike,
     side: str = "R",
 ) -> np.ndarray:
+    """Create thigh LCS based on ISB recommendations."""
     knee_center = 0.5 * (lateral_ep + medial_ep)
     if side == "R":
         return ktk.geometry.create_transform_series(
@@ -975,6 +979,7 @@ def create_shank_lcs(
     medial_mal: ArrayLike,
     side: str = "R",
 ) -> np.ndarray:
+    """Create shank LCS (test)."""
     ankle_center = 0.5 * (lateral_mal + medial_mal)
     if side == "R":
         return ktk.geometry.create_transform_series(
@@ -1000,6 +1005,7 @@ def create_foot_lcs(
     meta_head5: ArrayLike,
     side: str = "R",
 ) -> np.ndarray:
+    """Create foot LCS (test)."""
     meta_center = 0.5 * (meta_head1 + meta_head5)
     if side == "R":
         return ktk.geometry.create_transform_series(
@@ -1032,22 +1038,23 @@ def estimate_center_of_mass(
 
     Based on
 
-    Dumas, R., Chèze, L., Verriest, J.-P., 2007. Adjustments to McConville et al. and
-    Young et al. body segment inertial parameters. Journal of Biomechanics 40, 543–553.
-    https://doi.org/10.1016/j.jbiomech.2006.02.013
+    Dumas, R., Chèze, L., Verriest, J.-P., 2007. Adjustments to McConville et
+    al. and Young et al. body segment inertial parameters. Journal of
+    Biomechanics 40, 543–553. https://doi.org/10.1016/j.jbiomech.2006.02.013
 
     and
 
     Dumas, R., Chèze, L., Verriest, J.-P., 2007. Corrigendum to “Adjustments to
-    McConville et al. and Young et al. body segment inertial parameters” [J. Biomech.
-    40 (2007) 543–553]. Journal of Biomechanics 40, 1651–1652.
+    McConville et al. and Young et al. body segment inertial parameters”
+    [J. Biomech. 40 (2007) 543–553]. Journal of Biomechanics 40, 1651–1652.
     https://doi.org/10.1016/j.jbiomech.2006.07.016
 
 
     Parameters
     ----------
     points
-        ktk.TimeSeries that contains marker trajectories as Nx4 during an action.
+        ktk.TimeSeries that contains marker trajectories as Nx4 during an
+        action.
 
     segments
         Name of the segment. Can be 'Pelvis', 'Thorax', 'HeadNeck',
@@ -1065,126 +1072,129 @@ def estimate_center_of_mass(
         named {segment}CenterOfMass.
 
     """
-    points = points.copy()  # We will add points to it so copy it first.
-    output = points.copy(copy_data=False, copy_data_info=False)
+    raise ValueError("Not implemented yet.")
+    return ktk.TimeSeries()
+    # points = points.copy()  # We will add points to it so copy it first.
+    # output = points.copy(copy_data=False, copy_data_info=False)
 
-    # If we have no segment or an empty list, go with every segment
-    if len(segments) == 0:
-        segments = [
-            "Pelvis",
-            "Thorax",
-            "HeadNeck",
-            "ArmR",
-            "ArmL",
-            "ForearmR",
-            "ForearmL",
-            "HandR",
-            "HandL",
-            "ThighR",
-            "ThighL",
-            "LegR",
-            "LegL",
-            "FootR",
-            "FootL",
-        ]
+    # # If we have no segment or an empty list, go with every segment
+    # if len(segments) == 0:
+    #     segments = [
+    #         "Pelvis",
+    #         "Thorax",
+    #         "HeadNeck",
+    #         "ArmR",
+    #         "ArmL",
+    #         "ForearmR",
+    #         "ForearmL",
+    #         "HandR",
+    #         "HandL",
+    #         "ThighR",
+    #         "ThighL",
+    #         "LegR",
+    #         "LegL",
+    #         "FootR",
+    #         "FootL",
+    #     ]
 
-    # If we have a list of segments
-    if not isinstance(segments, str):
-        for segment in segments:
-            output.merge(
-                estimate_center_of_mass(points, segment),
-                in_place=True,
-            )
-        return output
+    # # If we have a list of segments
+    # if not isinstance(segments, str):
+    #     for segment in segments:
+    #         output.merge(
+    #             estimate_center_of_mass(points, segment),
+    #             in_place=True,
+    #         )
+    #     return output
 
-    # From here we have a single segment
-    segment = segments
+    # # From here we have a single segment
+    # segment = segments
 
-    # Decompose segment name and side
-    if segment not in ["Pelvis", "Thorax", "HeadNeck"]:
-        side = segment[-1]
-        segment = segment[0:-1]
-    else:
-        side = ""
+    # # Decompose segment name and side
+    # if segment not in ["Pelvis", "Thorax", "HeadNeck"]:
+    #     side = segment[-1]
+    #     segment = segment[0:-1]
+    # else:
+    #     side = ""
 
-    # Calculate the local coordinate system for this segment
-    lcs = track_local_coordinate_systems(points, segments=(segment + side))
+    # # Calculate the local coordinate system for this segment
+    # lcs = track_local_coordinate_systems(points, segments=(segment + side))
 
-    df = INERTIAL_VALUES["Dumas2007"]
-    # Search the inertial value tables for the given segment and sex
-    _ = df.loc[(df["Segment"] == segment) & (df["Gender"] == sex)]
-    constants = _.to_dict("records")[0]
+    # df = INERTIAL_VALUES["Dumas2007"]
+    # # Search the inertial value tables for the given segment and sex
+    # _ = df.loc[(df["Segment"] == segment) & (df["Gender"] == sex)]
+    # constants = _.to_dict("records")[0]
 
-    # Add possible missing points
-    if "ProjectedHipJointCenter" in [
-        constants["LengthPoint1"],
-        constants["LengthPoint2"],
-    ]:
-        # Calculate ProjectedHipJointCenter
-        local_rhip = ktk.geometry.get_local_coordinates(
-            points.data["HipJointCenterR"], lcs.data["Pelvis"]
-        )
-        local_rhip[:, 2] = 0  # Projection in sagittal plane
-        local_lhip = ktk.geometry.get_local_coordinates(
-            points.data["HipJointCenterL"], lcs.data["Pelvis"]
-        )
-        local_lhip[:, 2] = 0  # Projection in sagittal plane
-        local_hips = 0.5 * (local_rhip + local_lhip)
+    # # Add possible missing points
+    # if "ProjectedHipJointCenter" in [
+    #     constants["LengthPoint1"],
+    #     constants["LengthPoint2"],
+    # ]:
+    #     # Calculate ProjectedHipJointCenter
+    #     local_rhip = ktk.geometry.get_local_coordinates(
+    #         points.data["HipJointCenterR"], lcs.data["Pelvis"]
+    #     )
+    #     local_rhip[:, 2] = 0  # Projection in sagittal plane
+    #     local_lhip = ktk.geometry.get_local_coordinates(
+    #         points.data["HipJointCenterL"], lcs.data["Pelvis"]
+    #     )
+    #     local_lhip[:, 2] = 0  # Projection in sagittal plane
+    #     local_hips = 0.5 * (local_rhip + local_lhip)
 
-        points.data["ProjectedHipJointCenter"] = (
-            ktk.geometry.get_global_coordinates(local_hips, lcs.data["Pelvis"])
-        )
+    #     points.data["ProjectedHipJointCenter"] = (
+    #         ktk.geometry.get_global_coordinates(local_hips,
+    #            lcs.data["Pelvis"])
+    #     )
 
-    if "CarpalMetaHeadM25" in [
-        constants["LengthPoint1"],
-        constants["LengthPoint2"],
-    ]:
-        # Calculate midpoint of carpal meat head 2 and 5
-        points.data[f"CarpalMetaHeadM25{side}"] = 0.5 * (
-            points.data[f"CarpalMetaHead2{side}"]
-            + points.data[f"CarpalMetaHead5{side}"]
-        )
+    # if "CarpalMetaHeadM25" in [
+    #     constants["LengthPoint1"],
+    #     constants["LengthPoint2"],
+    # ]:
+    #     # Calculate midpoint of carpal meat head 2 and 5
+    #     points.data[f"CarpalMetaHeadM25{side}"] = 0.5 * (
+    #         points.data[f"CarpalMetaHead2{side}"]
+    #         + points.data[f"CarpalMetaHead5{side}"]
+    #     )
 
-    if "TarsalMetaHeadM15" in [
-        constants["LengthPoint1"],
-        constants["LengthPoint2"],
-    ]:
-        # Calculate midpoint of carpal meat head 2 and 5
-        points.data[f"TarsalMetaHeadM15{side}"] = 0.5 * (
-            points.data[f"TarsalMetaHead1{side}"]
-            + points.data[f"TarsalMetaHead5{side}"]
-        )
+    # if "TarsalMetaHeadM15" in [
+    #     constants["LengthPoint1"],
+    #     constants["LengthPoint2"],
+    # ]:
+    #     # Calculate midpoint of carpal meat head 2 and 5
+    #     points.data[f"TarsalMetaHeadM15{side}"] = 0.5 * (
+    #         points.data[f"TarsalMetaHead1{side}"]
+    #         + points.data[f"TarsalMetaHead5{side}"]
+    #     )
 
-    # Calculate the segment length
-    segment_length = np.sqrt(
-        np.sum(
-            np.nanmean(
-                points.data[constants["LengthPoint2"] + side]
-                - points.data[constants["LengthPoint1"] + side],
-                axis=0,
-            )
-            ** 2
-        )
-    )
+    # # Calculate the segment length
+    # segment_length = np.sqrt(
+    #     np.sum(
+    #         np.nanmean(
+    #             points.data[constants["LengthPoint2"] + side]
+    #             - points.data[constants["LengthPoint1"] + side],
+    #             axis=0,
+    #         )
+    #         ** 2
+    #     )
+    # )
 
-    # Add COM output
-    output.data[f"{segment}{side}CenterOfMass"] = (
-        ktk.geometry.get_global_coordinates(
-            np.array(
-                [
-                    [
-                        segment_length * constants["RelComX"],
-                        segment_length * constants["RelComY"],
-                        segment_length * constants["RelComZ"],
-                        1.0,
-                    ]
-                ]
-            ),
-            lcs.data[segment + side],
-        )
-    )
+    # # Add COM output
+    # output.data[f"{segment}{side}CenterOfMass"] = (
+    #     ktk.geometry.get_global_coordinates(
+    #         np.array(
+    #             [
+    #                 [
+    #                     segment_length * constants["RelComX"],
+    #                     segment_length * constants["RelComY"],
+    #                     segment_length * constants["RelComZ"],
+    #                     1.0,
+    #                 ]
+    #             ]
+    #         ),
+    #         lcs.data[segment + side],
+    #     )
+    # )
 
-    return output
+    # return output
 
 
 def estimate_global_center_of_mass(
