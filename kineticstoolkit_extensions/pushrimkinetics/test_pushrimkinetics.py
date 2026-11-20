@@ -40,7 +40,7 @@ TEST_CALIBRATION_MATRIX = {
 def test_read_smartwheel():
     """Test that read_file works similarly for SW's csv and txt files."""
     kinetics_csv = pk.read_smartwheel(
-        this_folder + "/data/pushrimkinetics_propulsion.csv"
+        this_folder + "/data/pushrimkinetics_propulsion.csv", delimiter=";"
     )
 
     kinetics_txt = pk.read_smartwheel(

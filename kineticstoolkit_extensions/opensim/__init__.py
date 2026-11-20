@@ -26,8 +26,9 @@ __license__ = "Apache 2.0"
 
 
 import subprocess
-
+import kineticstoolkit
 from kineticstoolkit import TimeSeries
+from kineticstoolkit_extensions import opensim as osim
 
 
 class Config:
@@ -52,7 +53,7 @@ def configure(python_path: str = "") -> None:
     config.python_path = python_path
 
 
-def run_scaling() -> None:
+def run_scaling(model_name : str, scale_setup : str, markers_traj : str) -> None:
     """
     Run a scaling operation.
 
@@ -64,6 +65,10 @@ def run_scaling() -> None:
 
     """
     # TODO Do something from the arguments
+    scale = osim.ScaleTool(scale_setup)
+    scale.getGenericModelMaker().setModelFileName(model_name)
+    scale.getGenericModelMaker().setMarkerSetFileName(markers_traj)
+    scale.printToXML(scale_setup)
     print(
         subprocess.check_output(
             [config.python_path, "run_scaling.py"]
