@@ -15,9 +15,7 @@
 # limitations under the License.
 
 
-"""
-Provide support for analysing movement data using OpenSim.
-"""
+"""Provide support for analysing movement data using OpenSim."""
 
 __author__ = "Mobility and Adaptive System Research Lab"
 __copyright__ = "Copyright (C) 2026 Mobility and Adaptive System Research Lab"
@@ -66,6 +64,7 @@ def run_scaling(
     marker_xml: str,
     marker_ts: ktk.TimeSeries,
     mass: float,
+    *,
     folder_output: str = None,
 ) -> dict:
     """
@@ -86,11 +85,14 @@ def run_scaling(
         Path of the xml file that will be used to create a scaled xml file
 
     marker_xml
-       Path of the xml file containing the positions of the markers on the rigid bodies
+       Path of the xml file containing the positions of the
+       markers on the rigid bodies
 
     marker_ts
-        TimeSeries containing the names and positions of markers at a static moment.
-        Make sure you have a clean TimeSeries before launching the function
+        TimeSeries containing the names and positions of markers
+        at a static moment.
+        Make sure you have a clean TimeSeries before launching the
+        function
 
     mass
         mass that we want for our scaled model
@@ -102,9 +104,8 @@ def run_scaling(
     Returns
     -------
     arg
-        Dictionary composed of the access paths of all the files necessary for this
-        function and created during it
-
+        Dictionary composed of the access paths of all the files
+        necessary for this function and created during it
     """
     # Definition of the exit folder if it was not given as an input
     if folder_output is None:
@@ -187,8 +188,7 @@ def read_trc(filename: str) -> ktk.TimeSeries:
     df = pd.read_csv(filename, sep=r"\s+", skiprows=6, header=None)
 
     # We filter to keep only the digital lines
-    # errors = "coerce" transforms untransformed character strings into numbers, in NAN
-
+    # errors="coerce" transforms untransformed character strings into numbers
     df = df.apply(pd.to_numeric, errors="coerce")
 
     # Time Recovery (2nd column of the DataFrame)
@@ -200,7 +200,8 @@ def read_trc(filename: str) -> ktk.TimeSeries:
     col_idx = 2  # The coordinates begin at column 3 (index 2)
 
     for key in marker_names:
-        # Extract the 3 columns X, Y, Z as a NumPy matrix, for a future time series
+        # Extract the 3 columns X, Y, Z as a NumPy matrix,
+        # for a future time series
         xyz = df.iloc[:, col_idx : col_idx + 3].to_numpy() * scale
 
         # Create the matrix (n_frames, 4) with the 4th column at 1.0
@@ -224,7 +225,8 @@ def read_trc(filename: str) -> ktk.TimeSeries:
 
     ts = ktk.TimeSeries(data=data, time=time, info=info)
 
-    # We check that the data recording is regular; if it is not, we manually calculate the time of the timeout.
+    # We check that the data recording is regular; if it is not,
+    # we manually calculate the time of the timeout.
     warnings.warn(
         "If your TimeSerie data is not calculated at regular intervals, it is mandatory to manually calculate the time for a sample"
     )

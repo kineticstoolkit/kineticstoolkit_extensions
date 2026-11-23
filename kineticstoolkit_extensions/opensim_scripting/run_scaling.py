@@ -28,14 +28,16 @@ from pathlib import Path
 
 import opensim as osim
 
-"""
-Example of our ARGS file : 
-    args = {"model_input" : "C:/Users/model.osim",
-            "scale_input" : "C:/Users/scale.xml",
-            "marker_xml" : "C:/Users/markers.xml",
-            "marker_trc": "C:/Users/marker.trc",
-            "mass" : 80,
-            "folder_output" : "C:/Users/output"}
+"""Example of our ARGS file.
+
+args = {
+    "model_input": "C:/Users/model.osim",
+    "scale_input": "C:/Users/scale.xml",
+    "marker_xml": "C:/Users/markers.xml",
+    "marker_trc": "C:/Users/marker.trc",
+    "mass": 80,
+    "folder_output": "C:/Users/output",
+}
 """
 
 
@@ -95,7 +97,8 @@ with open("args.json", "w", encoding="utf-8") as file:
     json.dump(args, file, indent=4, ensure_ascii=False)
 print("Données sauvegardées avec succès !")
 
-# Copy the JSON file and save it in the output folder if the output file is different from the current folder
+# Copy the JSON file and save it in the output folder
+# if the output file is different from the current folder
 path_json = Path(script_dir / "args.json")
 if Path("args.json").resolve() != path_json:
     shutil.copy("args.json", path_json)

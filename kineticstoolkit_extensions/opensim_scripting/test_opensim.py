@@ -23,6 +23,7 @@ __email__ = "chenier.felix@uqam.ca"
 __license__ = "Apache 2.0"
 
 
+import math
 import os
 import sys
 from pathlib import Path
@@ -48,7 +49,32 @@ else:
     )
 
 
-def test_write_trc():
+if __name__ == "__main__":
+    import pytest
+
+    pytest.main([__file__])
+
+
+def get_scale_factor(lines):
+    """
+    Detect the unit in the header of a .trc file.
+
+    Return the factorin millimeters.
+    """
+    # In a .trc standard, the units ('m' or 'mm') are in the first 4 lines
+    header_tokens = " ".join(lines[:4]).split()
+    if "m" in header_tokens:
+        return 1000.0
+    return 1.0
+
+
+def test_write__read_trc():
+    """
+    Test the write_trc and read_trc functions.
+
+    Compare the two TRC files we have.
+
+    """
     # Finding the folder where test_opensim.py is located
     root_folder = Path(__file__).parent
     name_marker_trc = "subject01_static.trc"
@@ -56,12 +82,70 @@ def test_write_trc():
     ts = opensim.read_trc(path_folder)
     output_path = root_folder / "new_file.trc"
     opensim.write_trc(output_path.as_posix(), ts)
-    assert output_path.exists()
+
+    # Comparison of the two trc files
+    with (
+        open(path_folder, encoding="utf-8") as f1,
+        open(output_path, encoding="utf-8") as f2,
+    ):
+        input_trc = f1.readlines()[1:]
+        output_trc = f2.readlines()[1:]
+
+    # We bring back the two files in millimeters.
+    scale1 = get_scale_factor(input_trc)
+    scale2 = get_scale_factor(output_trc)
+
+    if len(input_trc) != len(output_trc):
+        pytest.fail(
+            f"Different number of rows :\n"
+            f" input : {len(input_trc)} rows\n"
+            f" output : {len(output_trc)} rows"
+        )
+
+    for row_num, (trc_in, trc_out) in enumerate(
+        zip(input_trc, output_trc, strict=True), start=2
+    ):
+        tokens_in = trc_in.split()
+        tokens_out = trc_out.split()
+
+        for col_num, (i, j) in enumerate(
+            zip(tokens_in, tokens_out, strict=True), start=1
+        ):
+            try:
+                # If these are numbers, we compare with tolerance
+                v1, v2 = float(i), float(j)
+                if math.isnan(v1) and math.isnan(v2):
+                    continue
+                # These are the X, Y, Z coordinates.
+                if row_num >= 7 and col_num >= 3:
+                    v1 *= scale1
+                    v2 *= scale2
+
+                if not math.isclose(v1, v2, rel_tol=1e-4, abs_tol=1e-2):
+                    pytest.fail(
+                        f"Numeric difference at row {row_num}, column {col_num} :\n"
+                        f"  input (en mm) : {v1}\n"
+                        f"  output  (en mm) : {v2}\n"
+                    )
+            except ValueError:
+                # If it is text, exact equality is required
+                # Exception for units if it's m versus mm
+                if row_num == 3 and {i, j} == {"mm", "m"}:
+                    continue
+
+                if i != j:
+                    pytest.fail(
+                        f"Text difference at {row_num}, {col_num} column:\n"
+                        f"  input : '{i}'\n"
+                        f"  output  : '{j}'"
+                    )
 
 
 def test_scaling():
     """
-    WARNING : Define the configuration in the __init__ file
+    Test the run_scaling function.
+
+    Compare the osim folder.
 
     """
     # Finding the folder where test_opensim.py is located
@@ -90,9 +174,3 @@ def test_scaling():
         path_data[0], path_data[1], path_data[2], ts, mass
     )
     assert final_result is not None
-
-
-if __name__ == "__main__":
-    import pytest
-
-    pytest.main([__file__])
