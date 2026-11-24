@@ -1,3 +1,5 @@
+"""Check that we can reconstruct segment COM based on markers."""
+
 import kineticstoolkit.lab as ktk
 
 import kineticstoolkit_extensions.anthropometry as am

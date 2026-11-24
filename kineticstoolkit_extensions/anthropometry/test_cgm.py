@@ -72,8 +72,8 @@ static_points = ktk.read_c3d(
 )["Points"]
 
 # Rename markers
-for marker in marker_rename:
-    static_points.rename_data(marker, marker_rename[marker], in_place=True)
+for orig_marker, new_marker in marker_rename.items():
+    static_points.rename_data(orig_marker, new_marker, in_place=True)
 
 # Fake anthropometric measurements. Normally we would measure these dimensions
 # on the participant using a measuring tape.
@@ -164,9 +164,9 @@ clusters = {
 gait_points = ktk.read_c3d(gait_file, convert_point_unit=True)["Points"]
 
 # Rename markers
-for marker in marker_rename:
-    if marker in gait_points.data:
-        gait_points.rename_data(marker, marker_rename[marker], in_place=True)
+for orig_marker, new_marker in marker_rename.items():
+    if orig_marker in gait_points.data:
+        gait_points.rename_data(orig_marker, new_marker, in_place=True)
 
 # Add the joint centres
 tracked_points = ktk.kinematics.track_cluster(gait_points, clusters["Pelvis"])

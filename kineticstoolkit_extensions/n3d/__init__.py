@@ -15,9 +15,7 @@
 # limitations under the License.
 
 
-"""
-Read NDI Optotrak N3D files.
-"""
+"""Read NDI Optotrak N3D files."""
 
 __author__ = "Félix Chénier"
 __copyright__ = "Copyright (C) 2022 Félix Chénier"
@@ -61,15 +59,16 @@ def read_n3d(filename: str, labels: Sequence[str] = []) -> TimeSeries:
 
         n_frames = struct.unpack("i", fid.read(4))[0]
 
+        # F841 means Local variable assigned but never used
         collection_frame_frequency = struct.unpack("f", fid.read(4))[0]
-        user_comments = struct.unpack("60s", fid.read(60))[0]
-        system_comments = struct.unpack("60s", fid.read(60))[0]
-        file_description = struct.unpack("30s", fid.read(30))[0]
-        cutoff_filter_frequency = struct.unpack("h", fid.read(2))[0]
-        time_of_collection = struct.unpack("8s", fid.read(8))[0]
+        user_comments = struct.unpack("60s", fid.read(60))[0]  # noqa: F841
+        system_comments = struct.unpack("60s", fid.read(60))[0]  # noqa: F841
+        file_description = struct.unpack("30s", fid.read(30))[0]  # noqa: F841
+        cutoff_filter_frequency = struct.unpack("h", fid.read(2))[0]  # noqa: F841
+        time_of_collection = struct.unpack("8s", fid.read(8))[0]  # noqa: F841
         _ = fid.read(2)
-        date_of_collection = struct.unpack("8s", fid.read(8))[0]
-        extended_header = struct.unpack("73s", fid.read(73))[0]
+        date_of_collection = struct.unpack("8s", fid.read(8))[0]  # noqa: F841
+        extended_header = struct.unpack("73s", fid.read(73))[0]  # noqa: F841
 
         # Read the rest and put it in an array
         ndi_array = np.ones((n_frames, n_columns)) * np.nan
@@ -77,7 +76,7 @@ def read_n3d(filename: str, labels: Sequence[str] = []) -> TimeSeries:
         for i_frame in range(n_frames):
             for i_column in range(n_columns):
                 data = struct.unpack("f", fid.read(4))[0]
-                if data < -1e25:  # technically, it is -3.697314e+28
+                if np.isclose(data, 0):
                     data = np.nan
                 ndi_array[i_frame, i_column] = data
 

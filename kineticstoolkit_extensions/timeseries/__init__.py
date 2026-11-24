@@ -14,9 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-Provides additional generic TimeSeries utilities.
-"""
+"""Provides additional generic TimeSeries utilities."""
 
 __author__ = "Félix Chénier"
 __copyright__ = "Copyright (C) 2025 Félix Chénier"
@@ -35,6 +33,46 @@ def __dir__():
     return [
         "ui_draw",
     ]
+
+
+def _ui_draw_check_parameters(
+    filename, time_range, value_range, data_keys, data_units
+) -> tuple:
+    """Check and format ui_draw input parameters and return them as a tuple."""
+    if filename is not None:
+        check_param("filename", filename, str)
+    if time_range is not None:
+        time_range = np.array(time_range)
+    if value_range is not None:
+        value_range = np.array(value_range)
+
+    if isinstance(data_keys, str):
+        data_keys = [data_keys]
+    check_param("data_keys", data_keys, list, contents_type=str)
+
+    if isinstance(data_units, str):
+        data_units = [data_units for _ in data_keys]
+    if data_units is not None:
+        check_param("data_units", data_units, list, contents_type=str)
+
+    return (filename, time_range, value_range, data_keys, data_units)
+
+
+def _ui_draw_plot_image(filename):
+    """Plot image from filename or clipboard."""
+    if filename is None:
+        try:
+            img = ImageGrab.grabclipboard()
+        except TypeError:
+            raise TypeError("The clipboard does not contain an image.")
+    else:
+        img = Image.open(filename)
+
+    fig = plt.figure()
+    plt.imshow(img)
+    plt.xticks([])
+    plt.yticks([])
+    return fig
 
 
 def ui_draw(
@@ -82,30 +120,11 @@ def ui_draw(
 
     """
     # Check parameters
-    if filename is not None:
-        check_param("filename", filename, str)
-    if time_range is not None:
-        time_range = np.array(time_range)
-    if value_range is not None:
-        value_range = np.array(value_range)
-
-    if isinstance(data_keys, str):
-        data_keys = [data_keys]
-    check_param("data_keys", data_keys, list, contents_type=str)
-
-    if isinstance(data_units, str):
-        data_units = [data_units for _ in data_keys]
-    if data_units is not None:
-        check_param("data_units", data_units, list, contents_type=str)
-
-    # Load the image
-    if filename is None:
-        try:
-            img = ImageGrab.grabclipboard()
-        except TypeError:
-            raise TypeError("The clipboard does not contain an image.")
-    else:
-        img = Image.open(filename)
+    (filename, time_range, value_range, data_keys, data_units) = (
+        _ui_draw_check_parameters(
+            filename, time_range, value_range, data_keys, data_units
+        )
+    )
 
     # For default time_range and value_range
     min_time_in_pixels = np.inf
@@ -114,10 +133,7 @@ def ui_draw(
     max_value_in_pixels = -np.inf
 
     # Plot the image
-    fig = plt.figure()
-    plt.imshow(img)
-    plt.xticks([])
-    plt.yticks([])
+    fig = _ui_draw_plot_image(filename)
 
     # Draw the curves
     time_in_pixels_dict = {}
@@ -145,22 +161,23 @@ def ui_draw(
 
         # For default time_range and value_range
         min_time_in_pixels = min(
-            min_time_in_pixels, min(time_in_pixels_dict[data_key])
+            min_time_in_pixels, *time_in_pixels_dict[data_key]
         )
         max_time_in_pixels = max(
-            max_time_in_pixels, max(time_in_pixels_dict[data_key])
+            max_time_in_pixels, *time_in_pixels_dict[data_key]
         )
         min_value_in_pixels = min(
-            min_value_in_pixels, min(value_in_pixels_dict[data_key])
+            min_value_in_pixels, *value_in_pixels_dict[data_key]
         )
         max_value_in_pixels = max(
-            max_value_in_pixels, max(value_in_pixels_dict[data_key])
+            max_value_in_pixels, *value_in_pixels_dict[data_key]
         )
 
     # Get time range
     if time_range is not None:
         plt.title(
-            f"Click on the time axis at \nt={time_range[0]}, then t={time_range[1]}",
+            f"Click on the time axis at \nt={time_range[0]}, "
+            f"then t={time_range[1]}",
         )
         plt.draw()
         time_range_in_pixels = np.array(plt.ginput(2, timeout=0))[:, 0]
@@ -188,8 +205,8 @@ def ui_draw(
 
     # Construct the output TimeSeries and scale values (not time yet)
     new_time = set()
-    for key in time_in_pixels_dict:
-        new_time = new_time.union(set(time_in_pixels_dict[key]))
+    for _key, value in time_in_pixels_dict.items():
+        new_time = new_time.union(set(value))
 
     out_ts = ktk.TimeSeries(time=sorted(list(new_time)))
 
